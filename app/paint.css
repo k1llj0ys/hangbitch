@@ -422,13 +422,21 @@ textarea[readonly] { background: #f4f4f4; }
   min-height: 54px;
   max-height: 360px;
   padding: 8px;
-  overflow-y: auto;
+  overflow: auto;
   background: var(--light);
   border: 1px solid;
   border-color: var(--dark) var(--light) var(--light) var(--dark);
   box-shadow: inset 1px 1px 0 var(--shadow);
 }
 .word-display__placeholder { text-align: center; background: var(--light); font-weight: bold; }
+
+.word-row {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+}
 
 .tile {
   min-width: 16px;

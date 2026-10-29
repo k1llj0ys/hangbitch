@@ -475,25 +475,46 @@
     var revealedCount = 0;
     var letterCount = 0;
 
+    var rows = [];
+    var row = [];
     view.forEach(function (item) {
-      var span = document.createElement('span');
-      span.className = 'tile';
-      if (!item.guessable) {
-        span.classList.add(item.char === ' ' ? 'tile--space' : 'tile--fixed');
-        span.textContent = item.char === ' ' ? '' : item.char;
-      } else {
-        letterCount++;
-        if (item.revealed) {
-          revealedCount++;
-          span.classList.add('tile--revealed');
-          if (!/^[A-Za-z]$/.test(item.char)) {
-            span.classList.add('tile--auto');
-          }
-          // Only revealed characters are ever written into the DOM.
-          span.textContent = item.char;
+      if (item.char === ' ') {
+        if (row.length) {
+          rows.push(row);
+          row = [];
         }
+      } else {
+        row.push(item);
       }
-      container.appendChild(span);
+    });
+    if (row.length) {
+      rows.push(row);
+    }
+
+    rows.forEach(function (rowItems) {
+      var rowNode = document.createElement('div');
+      rowNode.className = 'word-row';
+      rowItems.forEach(function (item) {
+        var span = document.createElement('span');
+        span.className = 'tile';
+        if (!item.guessable) {
+          span.classList.add('tile--fixed');
+          span.textContent = item.char;
+        } else {
+          letterCount++;
+          if (item.revealed) {
+            revealedCount++;
+            span.classList.add('tile--revealed');
+            if (!/^[A-Za-z]$/.test(item.char)) {
+              span.classList.add('tile--auto');
+            }
+            // Only revealed characters are ever written into the DOM.
+            span.textContent = item.char;
+          }
+        }
+        rowNode.appendChild(span);
+      });
+      container.appendChild(rowNode);
     });
 
     container.setAttribute(
