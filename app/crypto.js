@@ -20,7 +20,7 @@
    * Constants
    * ------------------------------------------------------------------ */
 
-  var PAYLOAD_PREFIX = 'BHANGMAN1.';
+  var PAYLOAD_PREFIX = 'LESTERCUTE.';
   var ENVELOPE_VERSION = 1;
 
   var RSA_ALGORITHM = 'RSA-OAEP';
@@ -37,7 +37,7 @@
   var PBKDF2_ITERATIONS = 600000;
   var PBKDF2_SALT_BYTES = 16;
 
-  var BACKUP_TYPE = 'BHANGMAN-PRIVATE-KEY-BACKUP';
+  var BACKUP_TYPE = 'LESTERCUTE-PRIVATE-KEY-BACKUP';
   var BACKUP_VERSION = 1;
 
   var MIN_PASSPHRASE_LENGTH = 8;
@@ -662,7 +662,7 @@
    * Encrypt a secret for a recipient public key.
    * @param {string} publicKeyPem recipient public key (SPKI PEM or bare base64)
    * @param {{word: string, hint?: string}} secret
-   * @returns {Promise<string>} transport payload (BHANGMAN1.<base64url>)
+   * @returns {Promise<string>} transport payload (LESTERCUTE.<base64url>)
    */
   function encryptForRecipient(publicKeyPem, secret) {
     requireCrypto();
@@ -701,7 +701,7 @@
         aesKey = key;
         iv = randomBytes(GCM_IV_BYTES);
         var plaintext = JSON.stringify({
-          type: 'BHANGMAN-SECRET',
+          type: 'LESTERCUTE-SECRET',
           v: ENVELOPE_VERSION,
           word: word,
           hint: hint

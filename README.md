@@ -26,7 +26,7 @@ the `app/` folder, and it never reaches outside this project.
   --------------------                        --------
   1. Opens the app
   2. Shares the app URL
-  3. Receives the "BHANGMAN1.…" payload  ◄─── 4. "Generate a word"
+  3. Receives the "LESTERCUTE.…" payload  ◄─── 4. "Generate a word"
                                                5. Types a secret word + hint
                                                   (encrypted in their browser)
                                                6. Copies the payload
@@ -107,7 +107,7 @@ node tools/serve.js 8777 app
 
 - **Type a word** — put the secret in *Secret word or phrase*, add an optional
   hint, and press **Start game**. Needs no key and no payload.
-- **Paste an encrypted word** — paste the `BHANGMAN1.…` text and press **Unlock &
+- **Paste an encrypted word** — paste the `LESTERCUTE.…` text and press **Unlock &
   start**. It decrypts locally with this app's key.
 - Guess with the on-screen **A–Z** buttons **or** your physical keyboard.
   Correct guesses reveal every occurrence; a repeat costs nothing.
@@ -203,7 +203,7 @@ built-in key encrypts and decrypts a payload on its own.
 | I want to… | Do this |
 |---|---|
 | Play on my own, no keys | Double-click `start-game.bat` → **Play a game** → type a word → **Start game** |
-| Play a coworker's submission | **Play a game** → paste the `BHANGMAN1.…` payload → **Unlock & start** |
+| Play a coworker's submission | **Play a game** → paste the `LESTERCUTE.…` payload → **Unlock & start** |
 | Send someone a secret word | **Generate a word** → type it → **Encrypt** → **Copy encrypted payload** |
 | Just get started | Nothing — the built-in key already runs both jobs |
 | Use my own key | **Key settings → Generate a new key pair** (with a passphrase) |

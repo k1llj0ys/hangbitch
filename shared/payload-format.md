@@ -22,10 +22,10 @@ round trip works with no setup at all. You can replace it with your own pair fro
 The copyable string that coworkers paste into Teams is:
 
 ```
-BHANGMAN1.<base64url(utf8(JSON envelope))>
+LESTERCUTE.<base64url(utf8(JSON envelope))>
 ```
 
-* `BHANGMAN1.` — literal prefix identifying the format family (`BHANGMAN`, major
+* `LESTERCUTE.` — literal prefix identifying the format family (`LESTERCUTE`, major
   version `1`).
 * Everything after the prefix is the JSON envelope below, UTF-8 encoded and then
   Base64URL encoded (`-` and `_` instead of `+` and `/`, no `=` padding).
@@ -82,7 +82,7 @@ and tests; anything else is rejected with `PAYLOAD_FORMAT`.
 
 ```jsonc
 {
-  "type": "BHANGMAN-SECRET",
+  "type": "LESTERCUTE-SECRET",
   "v": 1,
   "word": "SECRET PHRASE",
   "hint": "optional hint, may be empty"
@@ -141,7 +141,7 @@ kid = lowercase_hex( SHA-256( DER-SPKI( recipient public key ) ) )
 
 ```jsonc
 {
-  "type": "BHANGMAN-PRIVATE-KEY-BACKUP",
+  "type": "LESTERCUTE-PRIVATE-KEY-BACKUP",
   "v": 1,
   "created": "2026-10-29T04:12:00.000Z",
   "kdf": { "name": "PBKDF2", "hash": "SHA-256", "iterations": 600000, "salt": "<base64url 16B>" },

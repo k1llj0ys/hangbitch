@@ -360,6 +360,7 @@ textarea[readonly] { background: #f4f4f4; }
   border: 1px solid;
   border-color: var(--dark) var(--light) var(--light) var(--dark);
   box-shadow: inset 1px 1px 0 var(--shadow);
+  position: relative;
 }
 
 .canvas-svg {
@@ -413,6 +414,80 @@ textarea[readonly] { background: #f4f4f4; }
 .life { color: #c00000; font-size: 14px; line-height: 1; }
 .life.lost { color: var(--shadow); text-decoration: line-through; }
 .lives__text { font-weight: bold; }
+
+/* ------------------------------------------------------------ thought bubbles */
+.thought-bubble {
+  position: absolute;
+  top: 28px;
+  left: 38%;
+  max-width: 42%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--dark);
+  box-shadow: 3px 3px 0 var(--shadow);
+  background: var(--light);
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 1.3;
+  text-align: center;
+  opacity: 0;
+  transform: scale(0.5);
+  pointer-events: none;
+  z-index: 12;
+}
+.thought-bubble:not(.hidden) {
+  animation: hb-bubble-pop 0.25s ease-out forwards;
+}
+.thought-bubble--win {
+  background: #e6ffe6;
+  border-color: #005f00;
+  color: #005f00;
+}
+.thought-bubble--loss {
+  background: #ffe1e1;
+  border-color: #a00000;
+  color: #a00000;
+}
+.thought-bubble__body { display: inline-block; }
+.thought-bubble__answer { font-weight: normal; font-size: 0.9em; opacity: 0.85; }
+
+.thought-bubble__tail {
+  position: absolute;
+  bottom: -9px;
+  right: -4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+.thought-bubble__dot {
+  position: relative;
+  border-radius: 50%;
+  background: var(--light);
+  border: 1px solid var(--dark);
+}
+.thought-bubble--win .thought-bubble__dot { border-color: #005f00; }
+.thought-bubble--loss .thought-bubble__dot { border-color: #a00000; }
+.thought-bubble__tail .thought-bubble__dot:nth-child(1) { width: 11px; height: 11px; }
+.thought-bubble__tail .thought-bubble__dot:nth-child(2) { width: 8px; height: 8px; }
+.thought-bubble__tail .thought-bubble__dot:nth-child(3) { width: 5px; height: 5px; }
+
+@keyframes hb-bubble-pop {
+  0% { opacity: 0; transform: scale(0.45); }
+  70% { transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 860px) {
+  .thought-bubble {
+    top: 16px;
+    left: 30%;
+    max-width: 55%;
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+  .thought-bubble__tail { bottom: -7px; right: -2px; }
+}
 
 /* ------------------------------------------------------------ word display */
 .word-display {

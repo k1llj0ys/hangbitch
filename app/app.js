@@ -126,6 +126,7 @@
       // game
       'view-game', 'hangman-svg', 'stage-caption', 'lives-display', 'lives-icons',
       'lives-text', 'word-display', 'message', 'letter-grid', 'doodles',
+      'thought-bubble-win', 'thought-bubble-loss', 'thought-bubble-answer',
       'btn-hint', 'btn-restart', 'btn-new-word', 'hint-box', 'hint-text',
       'answer-box', 'answer-text',
 
@@ -405,6 +406,7 @@
     renderBoard(null);
     renderLetters(null);
     updateStage(0);
+    hideThoughtBubbles();
     el['hint-box'].classList.add('hidden');
     el['hint-text'].textContent = '';
     el['answer-box'].classList.add('hidden');
@@ -436,6 +438,33 @@
     window.setTimeout(function () {
       wrap.classList.remove('shake');
     }, 500);
+  }
+
+  function showThoughtBubble(kind, answer) {
+    [el['thought-bubble-win'], el['thought-bubble-loss']].forEach(function (b) {
+      if (b) {
+        b.classList.add('hidden');
+      }
+    });
+    var bubble = el['thought-bubble-' + kind];
+    if (!bubble) {
+      return;
+    }
+    if (kind === 'loss' && el['thought-bubble-answer']) {
+      el['thought-bubble-answer'].textContent = answer ? ' — The answer was: ' + answer : '';
+    }
+    bubble.classList.remove('hidden');
+    bubble.classList.remove('thought-bubble--pop');
+    void bubble.offsetWidth;
+    bubble.classList.add('thought-bubble--pop');
+  }
+
+  function hideThoughtBubbles() {
+    [el['thought-bubble-win'], el['thought-bubble-loss']].forEach(function (b) {
+      if (b) {
+        b.classList.add('hidden');
+      }
+    });
   }
 
   function renderBoard(round) {
@@ -633,6 +662,7 @@
     el['btn-hint'].disabled = !round.hint;
 
     if (result === 'won') {
+      showThoughtBubble('win');
       setMessage('Solved! ' + (round.lives - round.wrong) + ' of ' + round.lives + ' lives left. Everyone drinks.', 'good');
       setState('Round won.');
       setTips('You solved it. Everyone drinks.');
@@ -651,6 +681,7 @@
       }
 
       setMessage('Out of lives — and out of luck. The beer mug appears.', 'bad');
+      showThoughtBubble('loss', L.answer(round));
       setState('Round lost.');
       setTips('The beer mug appeared.');
 

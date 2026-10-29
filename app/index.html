@@ -188,7 +188,7 @@
             <p class="muted">Someone else&rsquo;s encrypted payload, unlocked with this app&rsquo;s key.</p>
             <label class="field">
               <span>Encrypted payload</span>
-              <textarea id="payload-input" rows="4" spellcheck="false" placeholder="BHANGMAN1.eyJ2IjoxLCJhbGciOi&hellip;"></textarea>
+              <textarea id="payload-input" rows="4" spellcheck="false" placeholder="LESTERCUTE.eyJ2IjoxLCJhbGciOi&hellip;"></textarea>
             </label>
             <button type="button" class="btn" id="btn-import">Unlock &amp; start</button>
             <button type="button" class="btn" id="btn-clear-payload">Clear</button>
@@ -266,6 +266,24 @@
 
               <g id="doodles" class="doodles"></g>
             </svg>
+
+            <div class="thought-bubble thought-bubble--win hidden" id="thought-bubble-win" role="status" aria-live="polite">
+              <div class="thought-bubble__body">Nice one brox!</div>
+              <div class="thought-bubble__tail">
+                <span class="thought-bubble__dot"></span>
+                <span class="thought-bubble__dot"></span>
+                <span class="thought-bubble__dot"></span>
+              </div>
+            </div>
+
+            <div class="thought-bubble thought-bubble--loss hidden" id="thought-bubble-loss" role="status" aria-live="polite">
+              <div class="thought-bubble__body">BOBO!<span class="thought-bubble__answer" id="thought-bubble-answer"></span></div>
+              <div class="thought-bubble__tail">
+                <span class="thought-bubble__dot"></span>
+                <span class="thought-bubble__dot"></span>
+                <span class="thought-bubble__dot"></span>
+              </div>
+            </div>
           </div>
 
           <p class="caption" id="stage-caption">Gallows only &mdash; seven mistakes and he gets a beer.</p>
@@ -435,7 +453,7 @@
             </label>
             <label class="field">
               <span>&hellip;or paste the backup text</span>
-              <textarea id="restore-text" rows="3" spellcheck="false" placeholder='{"type":"BHANGMAN-PRIVATE-KEY-BACKUP", ...}'></textarea>
+              <textarea id="restore-text" rows="3" spellcheck="false" placeholder='{"type":"LESTERCUTE-PRIVATE-KEY-BACKUP", ...}'></textarea>
             </label>
             <label class="field">
               <span>Backup passphrase</span>
