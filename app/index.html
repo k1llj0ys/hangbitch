@@ -43,8 +43,114 @@
     </span>
   </div>
 
-  <!-- ===================== MENU BAR ===================== -->
-  <nav class="menubar" id="menubar" aria-label="Main menu">
+  <!-- ===================== RIBBON ===================== -->
+  <div class="ribbon">
+    <div class="ribbon__tabs">
+      <button type="button" class="ribbon__tab is-active" data-tab="file">File</button>
+      <button type="button" class="ribbon__tab" data-tab="home">Home</button>
+      <button type="button" class="ribbon__tab" data-tab="view">View</button>
+    </div>
+
+    <!-- File tab panel -->
+    <div class="ribbon__panel hidden" id="ribbon-file">
+      <div class="ribbon__group">
+        <div class="ribbon__group__label">File</div>
+        <button type="button" class="tbtn" id="tool-new" data-action="new-game" title="New game (opens the Play screen)">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 2 h7 l2 2 v10 h-9 z" fill="#ffffff" stroke="#404040"/><path d="M11 2 v2 h2" fill="none" stroke="#404040"/></svg>
+          <span class="sr-only">New</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Home tab panel -->
+    <div class="ribbon__panel is-active" id="ribbon-home">
+      <!-- Clipboard group -->
+      <div class="ribbon__group">
+        <div class="ribbon__group__label">Clipboard</div>
+        <button type="button" class="tbtn" id="tool-new" data-action="new-game" title="New game (opens the Play screen)">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 2 h7 l2 2 v10 h-9 z" fill="#ffffff" stroke="#404040"/><path d="M11 2 v2 h2" fill="none" stroke="#404040"/></svg>
+          <span class="sr-only">New</span>
+        </button>
+        <button type="button" class="tbtn" id="tool-restart" data-action="restart-round" title="Restart round (same secret, fresh lives)">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M13 8 a5 5 0 1 1 -1.6 -3.7" fill="none" stroke="#404040" stroke-width="1.6"/><path d="M12 1 L14.6 5 L9.4 5 z" fill="#404040"/></svg>
+          <span class="sr-only">Restart</span>
+        </button>
+      </div>
+
+      <!-- Tools group -->
+      <div class="ribbon__group">
+        <div class="ribbon__group__label">Tools</div>
+        <button type="button" class="tbtn" id="tool-pencil" data-action="tool-pencil" title="Pencil — draw on the canvas with the selected colour">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M12 1 L15 4 L5 14 L1 15 L2 11 z" fill="#d4d0c8" stroke="#404040"/><path d="M11 2 L14 5" stroke="#808080" fill="none"/></svg>
+          <span class="sr-only">Pencil</span>
+        </button>
+        <button type="button" class="tbtn" id="tool-eraser" data-action="tool-eraser" title="Eraser — rub out the strokes you drew">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 12 L9 4 L14 8 L8 14 z" fill="#ffd7c8" stroke="#404040"/><path d="M1 15 L15 15" stroke="#404040"/></svg>
+          <span class="sr-only">Eraser</span>
+        </button>
+        <button type="button" class="tbtn" id="tool-clear" data-action="clear-doodles" title="Clear the canvas doodles (the gallows and the figure stay)">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 4 L10 4 L10 13 L3 13 z" fill="#ffffff" stroke="#404040"/><path d="M10 7 L14 7 L14 13 L10 13" fill="#c0c0c0" stroke="#404040"/><path d="M12 2 L14 3 L11 6 L9 5 z" fill="#f2c14e" stroke="#404040"/></svg>
+          <span class="sr-only">Clear</span>
+        </button>
+      </div>
+
+      <!-- Game group -->
+      <div class="ribbon__group">
+        <div class="ribbon__group__label">Game</div>
+        <button type="button" class="tbtn" id="tool-hint" data-action="toggle-hint" title="Show the hint for this round">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="6" r="4" fill="#ffff80" stroke="#404040"/><path d="M6 11 h4 M6.6 13 h2.8" stroke="#404040"/></svg>
+          <span class="sr-only">Hint</span>
+        </button>
+      </div>
+
+      <span class="toolbar__spacer" style="display:inline-flex;flex:1;"></span>
+      <span class="toolbar__readout" id="tool-readout">Pencil · #000000</span>
+    </div>
+
+    <!-- View tab panel -->
+    <div class="ribbon__panel hidden" id="ribbon-view">
+      <div class="ribbon__group">
+        <div class="ribbon__group__label">View</div>
+        <button type="button" class="tbtn" data-action="toggle-lives" title="Show or hide the life counter">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 1 L1 15 L15 15 z" fill="none" stroke="#404040"/><path d="M8 6 L8 11" stroke="#404040" stroke-width="1.6"/></svg>
+          <span class="sr-only">Lives</span>
+        </button>
+        <button type="button" class="tbtn" data-action="clear-doodles" title="Clear canvas doodles">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 4 L10 4 L10 13 L3 13 z" fill="#ffffff" stroke="#404040"/><path d="M10 7 L14 7 L14 13 L10 13" fill="#c0c0c0" stroke="#404040"/><path d="M12 2 L14 3 L11 6 L9 5 z" fill="#f2c14e" stroke="#404040"/></svg>
+          <span class="sr-only">Clear</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Colors group (always visible, like Paint's colors section) -->
+    <div class="ribbon__colors">
+      <div class="ribbon__group">
+        <div class="ribbon__group__label">Colors</div>
+        <div class="palette__mini">
+          <span class="palette__swatch mini active" id="color-mini-1" data-ribcolor="#000000" style="background:#000000"></span>
+          <span class="palette__swatch mini" id="color-mini-2" data-ribcolor="#ffffff" style="background:#ffffff"></span>
+          <span class="palette__swatch mini" id="color-mini-3" data-ribcolor="#808080" style="background:#808080"></span>
+          <span class="palette__swatch mini" id="color-mini-4" data-ribcolor="#ff0000" style="background:#ff0000"></span>
+          <span class="palette__swatch mini" id="color-mini-5" data-ribcolor="#00ff00" style="background:#00ff00"></span>
+          <span class="palette__swatch mini" id="color-mini-6" data-ribcolor="#0000ff" style="background:#0000ff"></span>
+          <span class="palette__swatch mini" id="color-mini-7" data-ribcolor="#ffff00" style="background:#ffff00"></span>
+          <span class="palette__swatch mini" id="color-mini-8" data-ribcolor="#00ffff" style="background:#00ffff"></span>
+          <span class="palette__swatch mini" id="color-mini-9" data-ribcolor="#ff00ff" style="background:#ff00ff"></span>
+          <span class="palette__swatch mini" id="color-mini-10" data-ribcolor="#800000" style="background:#800000"></span>
+          <span class="palette__swatch mini" id="color-mini-11" data-ribcolor="#008000" style="background:#008000"></span>
+          <span class="palette__swatch mini" id="color-mini-12" data-ribcolor="#000080" style="background:#000080"></span>
+        </div>
+        <div class="palette__wells">
+          <div class="palette__well" id="color-current" style="background:#000000"></div>
+          <div class="palette__well palette__well--secondary" style="background:#ffffff"></div>
+        </div>
+        <button type="button" class="tbtn" id="btn-edit-colors" title="Edit colors" style="width:auto;height:auto;padding:2px 6px;font-size:11px;">Edit colors</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MENU BAR (kept for app.js compatibility, styled as ribbon tabs) ===================== -->
+  <nav class="menubar" id="menubar" aria-label="Main menu" style="display:none;">
     <div class="menu" id="menu-file">
       <button type="button" class="menu__btn" aria-haspopup="true" aria-expanded="false">File</button>
       <div class="menu__list" role="menu">
@@ -88,8 +194,8 @@
     <span class="chip" id="key-chip">Loading key&hellip;</span>
   </nav>
 
-  <!-- ===================== TOOLBAR ===================== -->
-  <div class="toolbar" role="toolbar" aria-label="Tools">
+  <!-- ===================== TOOLBAR (kept for app.js compatibility) ===================== -->
+  <div class="toolbar" role="toolbar" aria-label="Tools" style="display:none;">
     <button type="button" class="tbtn" id="tool-pencil" data-action="tool-pencil" title="Pencil — draw on the canvas with the selected colour">
       <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M12 1 L15 4 L5 14 L1 15 L2 11 z" fill="#d4d0c8" stroke="#404040"/><path d="M11 2 L14 5" stroke="#808080" fill="none"/></svg>
       <span class="sr-only">Pencil</span>

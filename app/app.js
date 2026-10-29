@@ -1631,6 +1631,25 @@
     el['btn-download-public'].addEventListener('click', handleExportPublic);
     el['gen-pass'].addEventListener('input', updatePassphraseHint);
 
+    // Ribbon tabs
+    var ribbonTabs = el['win'].querySelectorAll('.ribbon__tab');
+    Array.prototype.forEach.call(ribbonTabs, function (tab) {
+      tab.addEventListener('click', function () {
+        var targetTab = tab.getAttribute('data-tab');
+        Array.prototype.forEach.call(ribbonTabs, function (t) {
+          t.classList.toggle('is-active', t === tab);
+        });
+        ['file', 'home', 'view'].forEach(function (name) {
+          var panel = el['win'].querySelector('#ribbon-' + name);
+          if (panel) {
+            panel.classList.toggle('is-active', name === targetTab);
+            panel.classList.toggle('hidden', name !== targetTab);
+          }
+        });
+        setTips(targetTab.charAt(0).toUpperCase() + targetTab.slice(1) + ' tab.');
+      });
+    });
+
     // Title bar
     el['titlebar-min'].addEventListener('click', function () {
       var minimized = document.body.classList.toggle('minimized');
@@ -1679,6 +1698,26 @@
       selectTool('pencil');
       setTips(name + ' selected — drawing colour is now ' + hex + '.');
     });
+
+    // Mini ribbon palette swatches
+    document.addEventListener('click', function (event) {
+      var target = event.target;
+      if (!target || !target.closest) {
+        return;
+      }
+      var swatch = target.closest('.palette__swatch.mini');
+      if (!swatch) {
+        return;
+      }
+      var hex = swatch.getAttribute('data-ribcolor');
+      setColor(hex);
+      selectTool('pencil');
+      var wells = document.querySelectorAll('.palette__swatch.mini');
+      Array.prototype.forEach.call(wells, function (w) {
+        w.classList.toggle('active', w === swatch);
+      });
+      setTips('Colour set to ' + hex + '.');
+    }, true);
 
     // Freehand doodle layer over the illustration
     el['hangman-svg'].addEventListener('pointerdown', onCanvasPointerDown);
