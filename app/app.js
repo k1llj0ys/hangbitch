@@ -440,7 +440,7 @@
     }, 500);
   }
 
-  function showThoughtBubble(kind, answer) {
+  function showThoughtBubble(kind, answer, customBody) {
     [el['thought-bubble-win'], el['thought-bubble-loss']].forEach(function (b) {
       if (b) {
         b.classList.add('hidden');
@@ -450,8 +450,14 @@
     if (!bubble) {
       return;
     }
+    var body = bubble.querySelector('.thought-bubble__body');
+    if (body) {
+      body.textContent = customBody || (kind === 'win' ? 'Nice one brox!' : 'BOBO!');
+    }
     if (kind === 'loss' && el['thought-bubble-answer']) {
-      el['thought-bubble-answer'].textContent = answer ? ' — The answer was: ' + answer : '';
+      el['thought-bubble-answer'].textContent = customBody
+        ? ''
+        : answer ? ' — The answer was: ' + answer : '';
     }
     bubble.classList.remove('hidden');
     bubble.classList.remove('thought-bubble--pop');
@@ -580,6 +586,7 @@
   }
 
   function startRound(secret) {
+    hideThoughtBubbles();
     var round = L.createRound(secret);
     state.round = round;
     el['answer-box'].classList.add('hidden');
@@ -611,7 +618,8 @@
     startRound(secret);
     setMessage('Round restarted. Same secret, fresh lives.', 'info');
     setState('Round restarted.');
-    setTips('Same secret, fresh lives.');
+    hideThoughtBubbles();
+    showThoughtBubble('loss', null, "Mamatay ta's imong ka-bugo brox!");
   }
 
   function handleGuess(letter) {
