@@ -1,0 +1,21 @@
+# --- Secrets: never commit these -------------------------------------------
+# Private-key backups produced by Hangbitch
+*.bhkey.json
+*private-key*
+*key-backup*
+hangbitch-key-backup.json
+
+# Payloads captured from Teams
+*.payload.txt
+*.payload.json
+payload*.txt
+
+# --- Generic ---------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+node_modules/
+.vscode/
+.idea/
+__pycache__/

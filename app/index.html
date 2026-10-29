@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hangbitch</title>
+<meta name="description" content="Hangbitch — seven-life Hangman and a public-key encryptor wearing a classic Microsoft Paint / Windows XP costume. Everything happens in your browser.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0a246a">
+<meta name="referrer" content="no-referrer">
+<link rel="stylesheet" href="paint.css">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+<link rel="apple-touch-icon" href="assets/icon.svg">
+</head>
+<body>
+<noscript>
+  <p class="banner banner--error">Hangbitch needs JavaScript. Nothing works without it.</p>
+</noscript>
+
+<div id="env-warning" class="banner banner--error hidden" role="alert">
+  <strong>Web Crypto is unavailable here.</strong>
+  <span id="env-warning-text"></span>
+</div>
+
+<div class="win" id="win">
+
+  <!-- ===================== TITLE BAR ===================== -->
+  <div class="titlebar">
+    <span class="titlebar__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="16" height="16" role="presentation">
+        <rect x="2" y="3" width="20" height="18" fill="#ffffff" stroke="#404040" stroke-width="1.5"/>
+        <rect x="4" y="3" width="16" height="3" fill="#0a246a"/>
+        <path d="M7 15 L12 8 L17 15" fill="none" stroke="#c00000" stroke-width="1.6"/>
+        <rect x="9" y="15" width="6" height="4" fill="#f2c14e" stroke="#404040" stroke-width="1"/>
+      </svg>
+    </span>
+    <span class="titlebar__title">Hangbitch</span>
+    <span class="titlebar__controls">
+      <button type="button" class="tbtn-ctl" id="titlebar-min" title="Minimize (rolls this window up)"><span aria-hidden="true">_</span><span class="sr-only">Minimize</span></button>
+      <button type="button" class="tbtn-ctl" id="titlebar-max" title="Maximize (fills the browser window)"><span aria-hidden="true">&#9744;</span><span class="sr-only">Maximize</span></button>
+      <button type="button" class="tbtn-ctl tbtn-ctl--close" id="titlebar-close" title="Close this document (back to Home)"><span aria-hidden="true">&#10005;</span><span class="sr-only">Close</span></button>
+    </span>
+  </div>
+
+  <!-- ===================== MENU BAR ===================== -->
+  <nav class="menubar" id="menubar" aria-label="Main menu">
+    <div class="menu" id="menu-file">
+      <button type="button" class="menu__btn" aria-haspopup="true" aria-expanded="false">File</button>
+      <div class="menu__list" role="menu">
+        <button type="button" class="menu__item" role="menuitem" data-action="new-game">New Game</button>
+        <button type="button" class="menu__item" role="menuitem" data-action="restart-round">Restart Round</button>
+        <button type="button" class="menu__item" role="menuitem" data-action="back-home">Back to Home</button>
+        <div class="menu__sep" role="separator"></div>
+        <button type="button" class="menu__item" role="menuitem" data-action="import-word">Import Encrypted Word&hellip;</button>
+      </div>
+    </div>
+
+    <div class="menu" id="menu-edit">
+      <button type="button" class="menu__btn" aria-haspopup="true" aria-expanded="false">Edit</button>
+      <div class="menu__list" role="menu">
+        <button type="button" class="menu__item" role="menuitem" data-action="clear-word">Clear Word Box</button>
+        <button type="button" class="menu__item" role="menuitem" data-action="clear-payload">Clear Payload Box</button>
+        <div class="menu__sep" role="separator"></div>
+        <button type="button" class="menu__item" role="menuitem" data-action="reset-round">Reset Current Round</button>
+      </div>
+    </div>
+
+    <div class="menu" id="menu-view">
+      <button type="button" class="menu__btn" aria-haspopup="true" aria-expanded="false">View</button>
+      <div class="menu__list" role="menu">
+        <button type="button" class="menu__item" role="menuitem" data-action="toggle-hint">Show Hint</button>
+        <button type="button" class="menu__item" role="menuitem" data-action="toggle-lives">Hide Lives</button>
+        <div class="menu__sep" role="separator"></div>
+        <button type="button" class="menu__item" role="menuitem" data-action="clear-doodles">Clear Canvas Doodles</button>
+      </div>
+    </div>
+
+    <div class="menu" id="menu-help">
+      <button type="button" class="menu__btn" aria-haspopup="true" aria-expanded="false">Help</button>
+      <div class="menu__list" role="menu">
+        <button type="button" class="menu__item" role="menuitem" data-action="how-to-play">How to Play</button>
+        <button type="button" class="menu__item" role="menuitem" data-action="about">About Hangbitch</button>
+      </div>
+    </div>
+
+    <span class="menubar__spacer"></span>
+    <span class="chip" id="key-chip">Loading key&hellip;</span>
+  </nav>
+
+  <!-- ===================== TOOLBAR ===================== -->
+  <div class="toolbar" role="toolbar" aria-label="Tools">
+    <button type="button" class="tbtn" id="tool-pencil" data-action="tool-pencil" title="Pencil — draw on the canvas with the selected colour">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M12 1 L15 4 L5 14 L1 15 L2 11 z" fill="#d4d0c8" stroke="#404040"/><path d="M11 2 L14 5" stroke="#808080" fill="none"/></svg>
+      <span class="sr-only">Pencil</span>
+    </button>
+    <button type="button" class="tbtn" id="tool-eraser" data-action="tool-eraser" title="Eraser — rub out the strokes you drew">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 12 L9 4 L14 8 L8 14 z" fill="#ffd7c8" stroke="#404040"/><path d="M1 15 L15 15" stroke="#404040"/></svg>
+      <span class="sr-only">Eraser</span>
+    </button>
+    <button type="button" class="tbtn" id="tool-clear" data-action="clear-doodles" title="Clear the canvas doodles (the gallows and the figure stay)">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 4 L10 4 L10 13 L3 13 z" fill="#ffffff" stroke="#404040"/><path d="M10 7 L14 7 L14 13 L10 13" fill="#c0c0c0" stroke="#404040"/><path d="M12 2 L14 3 L11 6 L9 5 z" fill="#f2c14e" stroke="#404040"/></svg>
+      <span class="sr-only">Clear doodles</span>
+    </button>
+
+    <span class="toolbar__sep" role="separator"></span>
+
+    <button type="button" class="tbtn" id="tool-new" data-action="new-game" title="New game (opens the Play screen)">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 2 h7 l2 2 v10 h-9 z" fill="#ffffff" stroke="#404040"/><path d="M11 2 v2 h2" fill="none" stroke="#404040"/></svg>
+      <span class="sr-only">New game</span>
+    </button>
+    <button type="button" class="tbtn" id="tool-restart" data-action="restart-round" title="Restart round (same secret, fresh lives)">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M13 8 a5 5 0 1 1 -1.6 -3.7" fill="none" stroke="#404040" stroke-width="1.6"/><path d="M12 1 L14.6 5 L9.4 5 z" fill="#404040"/></svg>
+      <span class="sr-only">Restart round</span>
+    </button>
+    <button type="button" class="tbtn" id="tool-hint" data-action="toggle-hint" title="Show the hint for this round">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="6" r="4" fill="#ffff80" stroke="#404040"/><path d="M6 11 h4 M6.6 13 h2.8" stroke="#404040"/></svg>
+      <span class="sr-only">Hint</span>
+    </button>
+
+    <span class="toolbar__spacer"></span>
+    <span class="toolbar__readout" id="tool-readout">Pencil</span>
+  </div>
+
+  <!-- ===================== WORKSPACE ===================== -->
+  <main class="workspace">
+
+    <!-- ---------- VIEW: HOME ---------- -->
+    <section class="view" id="view-home">
+      <div class="paint-canvas">
+        <h1 class="canvas-title">untitled &mdash; Hangbitch</h1>
+        <p class="canvas-text">Seven lives, one word &mdash; and a set of key tools, all wearing an old
+          drawing program as a costume. Pick a job below.</p>
+
+        <div class="home-grid">
+          <button type="button" class="pick" id="btn-go-play">
+            <span class="pick__icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" width="34" height="34" role="presentation">
+                <path d="M6 4 v24 M6 6 h16 v8" fill="none" stroke="#000000" stroke-width="2.5"/>
+                <circle cx="22" cy="18" r="5" fill="none" stroke="#000000" stroke-width="2.5"/>
+                <path d="M22 23 v5 M19.5 28 h5" fill="none" stroke="#000000" stroke-width="2.5"/>
+              </svg>
+            </span>
+            <span class="pick__title">Play a game</span>
+            <span class="pick__sub">Type a word yourself, or paste an encrypted word someone sent you. Seven lives, one beer.</span>
+          </button>
+
+          <button type="button" class="pick" id="btn-go-encrypt">
+            <span class="pick__icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" width="34" height="34" role="presentation">
+                <path d="M16 4 v12" fill="none" stroke="#000000" stroke-width="2.5"/>
+                <rect x="9" y="16" width="14" height="11" fill="none" stroke="#000000" stroke-width="2.5"/>
+                <path d="M11 16 v-3 a5 5 0 0 1 10 0 v3" fill="none" stroke="#000000" stroke-width="2.5"/>
+              </svg>
+            </span>
+            <span class="pick__title">Generate a word</span>
+            <span class="pick__sub">Encrypt a secret word for the host, then send them the payload. Nobody sees the word &mdash; not even the host.</span>
+          </button>
+        </div>
+
+        <div class="actions actions--end">
+          <button type="button" class="btn" id="btn-open-keys">Key settings&hellip;</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- VIEW: PLAY ---------- -->
+    <section class="view hidden" id="view-play">
+      <div class="paint-canvas">
+        <div class="setup-grid">
+          <div class="groupbox">
+            <span class="groupbox__label">Type a word</span>
+            <p class="muted">Play on your own right now. No keys, no payload, no internet.</p>
+            <label class="field">
+              <span>Secret word or phrase</span>
+              <input type="text" id="manual-word" autocomplete="off" spellcheck="false" placeholder="e.g. BETTY BOUGHT BUTTER">
+            </label>
+            <label class="field">
+              <span>Hint (optional)</span>
+              <input type="text" id="manual-hint" autocomplete="off" spellcheck="false" placeholder="e.g. tongue twister">
+            </label>
+            <button type="button" class="btn btn--primary" id="btn-manual-start">Start game</button>
+            <p class="status" id="manual-status" role="status" aria-live="polite"></p>
+          </div>
+
+          <div class="groupbox">
+            <span class="groupbox__label">Paste an encrypted word</span>
+            <p class="muted">Someone else&rsquo;s encrypted payload, unlocked with this app&rsquo;s key.</p>
+            <label class="field">
+              <span>Encrypted payload</span>
+              <textarea id="payload-input" rows="4" spellcheck="false" placeholder="BHANGMAN1.eyJ2IjoxLCJhbGciOi&hellip;"></textarea>
+            </label>
+            <button type="button" class="btn" id="btn-import">Unlock &amp; start</button>
+            <button type="button" class="btn" id="btn-clear-payload">Clear</button>
+            <p class="hint" id="decrypt-key-note">Uses the app&rsquo;s key &mdash; nothing to set up.</p>
+            <p class="status" id="payload-meta" aria-live="polite"></p>
+            <p class="status" id="import-status" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <div class="actions actions--end">
+          <button type="button" class="btn" id="btn-home-from-play">Back</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- VIEW: GAME ---------- -->
+    <section class="view hidden" id="view-game">
+      <div class="game-grid" aria-label="Game board">
+
+        <div class="stage-col">
+          <div class="canvas-frame">
+            <svg id="hangman-svg" class="canvas-svg" viewBox="0 0 320 330" role="img"
+                 aria-labelledby="hangman-title hangman-desc" data-stage="0">
+              <title id="hangman-title">Hangbitch illustration</title>
+              <desc id="hangman-desc">A rough hand-drawn gallows. One body part is scribbled in for each wrong guess; the seventh wrong guess adds a beer mug.</desc>
+
+              <g class="gallows" aria-hidden="true">
+                <path class="ink" d="M8 305 L150 303"/>
+                <path class="ink" d="M37 306 L34 26"/>
+                <path class="ink" d="M34 26 L238 30"/>
+                <path class="ink" d="M233 31 L230 64"/>
+                <path class="ink" d="M221 64 q9 -7 19 1 q-9 6 -19 -1 z"/>
+              </g>
+
+              <g class="figure">
+                <g class="part" data-part="head">
+                  <circle class="ink" cx="230" cy="92" r="27"/>
+                  <path class="ink" d="M218 84 l9 9 M227 84 l-9 9"/>
+                  <path class="ink" d="M235 84 l9 9 M244 84 l-9 9"/>
+                  <path class="ink" d="M219 105 q10 9 21 0"/>
+                  <path class="ink" d="M226 110 q4 -6 8 0"/>
+                </g>
+
+                <g class="part" data-part="body">
+                  <path class="ink" d="M230 119 L228 191"/>
+                </g>
+
+                <g class="part" data-part="left-arm">
+                  <path class="ink" d="M229 134 L195 168"/>
+                </g>
+
+                <g class="part" data-part="right-arm">
+                  <path class="ink" d="M229 134 L263 166"/>
+                </g>
+
+                <g class="part" data-part="left-leg">
+                  <path class="ink" d="M228 191 L205 245"/>
+                  <path class="ink" d="M205 245 L182 249"/>
+                </g>
+
+                <g class="part" data-part="right-leg">
+                  <path class="ink" d="M228 191 L251 245"/>
+                  <path class="ink" d="M251 245 L272 249"/>
+                </g>
+
+                <g class="part" data-part="beer">
+                  <path class="beer-glass" d="M268 196 L302 196 L300 242 L270 242 z"/>
+                  <path class="beer-foam" d="M265 196 q20 -14 42 0 q-21 8 -42 0 z"/>
+                  <path class="ink" d="M302 206 q16 11 0 23"/>
+                  <circle class="beer-bubble" cx="280" cy="212" r="3"/>
+                  <circle class="beer-bubble" cx="290" cy="224" r="2.4"/>
+                  <circle class="beer-bubble" cx="277" cy="230" r="1.8"/>
+                </g>
+              </g>
+
+              <g id="doodles" class="doodles"></g>
+            </svg>
+          </div>
+
+          <p class="caption" id="stage-caption">Gallows only &mdash; seven mistakes and he gets a beer.</p>
+
+          <div class="lives" id="lives-display" role="status" aria-live="polite">
+            <span class="label">Lives</span>
+            <span class="lives__icons" id="lives-icons" aria-hidden="true"></span>
+            <span class="lives__text" id="lives-text">7 / 7</span>
+          </div>
+        </div>
+
+        <div class="play-col">
+          <div class="groupbox">
+            <span class="groupbox__label">Guess a letter</span>
+            <p class="muted">Correct guesses reveal every occurrence. Wrong guesses cost exactly one life.</p>
+
+            <div class="word-display" id="word-display" aria-live="polite" aria-label="Secret word">
+              <p class="word-display__placeholder" id="word-placeholder">Type a word or paste an encrypted payload to begin.</p>
+            </div>
+
+            <div class="message" id="message" role="status" aria-live="polite"></div>
+
+            <div class="letter-grid" id="letter-grid" role="group" aria-label="Letter guesses"></div>
+
+            <div class="actions">
+              <button type="button" class="btn" id="btn-hint" disabled>Reveal hint</button>
+              <button type="button" class="btn" id="btn-restart" disabled>Restart round</button>
+              <button type="button" class="btn" id="btn-new-word">New game&hellip;</button>
+            </div>
+
+            <div class="hint-box hidden" id="hint-box">
+              <span class="label">Hint</span>
+              <p id="hint-text"></p>
+            </div>
+
+            <div class="answer-box hidden" id="answer-box">
+              <span class="label">Answer</span>
+              <p id="answer-text"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- VIEW: ENCRYPT ---------- -->
+    <section class="view hidden" id="view-encrypt">
+      <div class="paint-canvas">
+        <div class="encrypt-grid">
+          <div class="groupbox">
+            <span class="groupbox__label">1. Type your secret</span>
+            <p class="muted">Encryption happens in this browser. The word never leaves your device in readable form.</p>
+
+            <label class="field">
+              <span>Secret word or phrase <span class="counter" id="word-counter">0 / 500</span></span>
+              <textarea id="word" rows="2" spellcheck="false" autocomplete="off"
+                        placeholder="e.g. BETTY BOUGHT BUTTER"></textarea>
+            </label>
+
+            <label class="field">
+              <span>Hint (optional) <span class="counter" id="hint-counter">0 / 300</span></span>
+              <input type="text" id="hint" autocomplete="off" spellcheck="false"
+                     placeholder="e.g. tongue twister">
+            </label>
+
+            <p class="status" id="form-status" role="status" aria-live="polite"></p>
+
+            <div class="actions">
+              <button type="button" class="btn btn--primary" id="btn-encrypt">Encrypt</button>
+              <button type="button" class="btn" id="btn-clear">Clear</button>
+            </div>
+
+            <p class="fineprint">
+              Your word is normalised slightly before encryption (Unicode NFC, tabs and line breaks become single spaces,
+              outer whitespace trimmed). Spaces and punctuation are kept exactly and are shown to guessers.
+            </p>
+          </div>
+
+          <div class="groupbox">
+            <span class="groupbox__label">2. Send it</span>
+            <p class="muted">Copy the payload and send it to the host. It targets this app&rsquo;s key.</p>
+
+            <label class="field">
+              <span>Encrypted payload</span>
+              <textarea id="payload" rows="7" readonly spellcheck="false"
+                        placeholder="Your encrypted payload appears here."></textarea>
+            </label>
+
+            <div class="actions">
+              <button type="button" class="btn btn--primary" id="btn-copy" disabled>Copy encrypted payload</button>
+              <button type="button" class="btn" id="btn-reset" disabled>Start over</button>
+            </div>
+
+            <p class="status" id="encrypt-status" role="status" aria-live="polite"></p>
+
+            <div class="success hidden" id="success-box">
+              <span class="label">Encryption complete</span>
+              <p>Send the payload above to the host. They will paste it into <em>Play a game</em> &mdash; you never send
+                the plaintext word and no password is involved.</p>
+              <p class="hint">Only the holder of the matching private key can read it.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions actions--end">
+          <button type="button" class="btn" id="btn-home-from-encrypt">Back</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- VIEW: KEY SETTINGS ---------- -->
+    <section class="view hidden" id="view-keys">
+      <div class="paint-canvas" id="setup-panel" aria-labelledby="setup-title">
+        <span class="groupbox__label" id="setup-title">Key settings</span>
+        <p class="muted">One key pair runs the whole app: <em>Generate a word</em> encrypts to its public half and
+          <em>Play a game</em> decrypts with its private half. A built-in pair ships with the app, so there is nothing
+          to set up &mdash; change it here if you want your own.</p>
+
+        <div id="key-state" class="state state--locked" role="status">
+          <span class="state__dot" aria-hidden="true"></span>
+          <span id="key-state-text">Loading key&hellip;</span>
+        </div>
+
+        <div class="results" id="key-results">
+          <div class="fp-block">
+            <div>
+              <span class="label">Key fingerprint</span>
+              <code class="fp" id="key-fingerprint">&mdash;</code>
+              <p class="hint">Both sides must use the same key pair. This fingerprint is how you check it.</p>
+            </div>
+            <div class="key-actions">
+              <button type="button" class="btn" id="btn-copy-public">Copy public key</button>
+              <button type="button" class="btn" id="btn-download-public">Download public key</button>
+              <button type="button" class="btn" id="btn-use-default">Use built-in key</button>
+            </div>
+          </div>
+          <label class="field">
+            <span>Public key (PEM)</span>
+            <textarea id="public-pem" rows="5" readonly spellcheck="false"></textarea>
+          </label>
+        </div>
+
+        <div class="setup-grid">
+          <div class="groupbox">
+            <span class="groupbox__label">Change key pair</span>
+            <p class="muted">Generate a fresh RSA-OAEP 3072-bit pair and use it instead of the built-in one. It is
+              remembered in this browser, and a passphrase-protected backup downloads for safekeeping.</p>
+            <label class="field">
+              <span>Backup passphrase</span>
+              <input type="password" id="gen-pass" autocomplete="new-password" spellcheck="false" placeholder="at least 8 characters">
+            </label>
+            <label class="field">
+              <span>Confirm passphrase</span>
+              <input type="password" id="gen-pass-confirm" autocomplete="new-password" spellcheck="false" placeholder="repeat it">
+            </label>
+            <p class="hint" id="gen-pass-hint" aria-live="polite">Aim for 12+ characters. This passphrase only unlocks your key backup.</p>
+            <button type="button" class="btn btn--primary" id="btn-generate">Generate a new key pair</button>
+            <p class="hint hint--warn">A backup file will download. Move it somewhere safe and out of this Git folder.</p>
+          </div>
+
+          <div class="groupbox">
+            <span class="groupbox__label">Restore from a backup</span>
+            <p class="muted">Bring a key pair back on a fresh install or another PC. Takes a few seconds (600,000 PBKDF2
+              rounds).</p>
+            <label class="field">
+              <span>Backup file (.json)</span>
+              <input type="file" id="restore-file" accept=".json,application/json,text/plain">
+            </label>
+            <label class="field">
+              <span>&hellip;or paste the backup text</span>
+              <textarea id="restore-text" rows="3" spellcheck="false" placeholder='{"type":"BHANGMAN-PRIVATE-KEY-BACKUP", ...}'></textarea>
+            </label>
+            <label class="field">
+              <span>Backup passphrase</span>
+              <input type="password" id="restore-pass" autocomplete="current-password" spellcheck="false">
+            </label>
+            <button type="button" class="btn" id="btn-restore">Restore &amp; use</button>
+          </div>
+        </div>
+
+        <p class="status" id="setup-status" role="status" aria-live="polite"></p>
+
+        <div class="actions actions--end">
+          <button type="button" class="btn" id="btn-home-from-keys">Back</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== COLOUR PALETTE ===================== -->
+  <div class="palette" id="palette" role="group" aria-label="Drawing colour">
+    <span class="palette__current" aria-hidden="true">
+      <span class="palette__well" id="color-current"></span>
+    </span>
+    <div class="palette__grid">
+      <button type="button" class="swatch swatch-1"  data-color="#000000" title="Black #000000"></button>
+      <button type="button" class="swatch swatch-2"  data-color="#808080" title="Gray #808080"></button>
+      <button type="button" class="swatch swatch-3"  data-color="#800000" title="Dark red #800000"></button>
+      <button type="button" class="swatch swatch-4"  data-color="#808000" title="Olive #808000"></button>
+      <button type="button" class="swatch swatch-5"  data-color="#008000" title="Dark green #008000"></button>
+      <button type="button" class="swatch swatch-6"  data-color="#008080" title="Teal #008080"></button>
+      <button type="button" class="swatch swatch-7"  data-color="#000080" title="Navy #000080"></button>
+      <button type="button" class="swatch swatch-8"  data-color="#800080" title="Purple #800080"></button>
+      <button type="button" class="swatch swatch-9"  data-color="#808040" title="Dull olive #808040"></button>
+      <button type="button" class="swatch swatch-10" data-color="#004040" title="Deep teal #004040"></button>
+      <button type="button" class="swatch swatch-11" data-color="#0080ff" title="Sky blue #0080FF"></button>
+      <button type="button" class="swatch swatch-12" data-color="#004080" title="Dark blue #004080"></button>
+      <button type="button" class="swatch swatch-13" data-color="#8000ff" title="Violet #8000FF"></button>
+      <button type="button" class="swatch swatch-14" data-color="#804000" title="Brown #804000"></button>
+
+      <button type="button" class="swatch swatch-15" data-color="#ffffff" title="White #FFFFFF"></button>
+      <button type="button" class="swatch swatch-16" data-color="#c0c0c0" title="Silver #C0C0C0"></button>
+      <button type="button" class="swatch swatch-17" data-color="#ff0000" title="Red #FF0000"></button>
+      <button type="button" class="swatch swatch-18" data-color="#ffff00" title="Yellow #FFFF00"></button>
+      <button type="button" class="swatch swatch-19" data-color="#00ff00" title="Green #00FF00"></button>
+      <button type="button" class="swatch swatch-20" data-color="#00ffff" title="Cyan #00FFFF"></button>
+      <button type="button" class="swatch swatch-21" data-color="#0000ff" title="Blue #0000FF"></button>
+      <button type="button" class="swatch swatch-22" data-color="#ff00ff" title="Magenta #FF00FF"></button>
+      <button type="button" class="swatch swatch-23" data-color="#ffff80" title="Pale yellow #FFFF80"></button>
+      <button type="button" class="swatch swatch-24" data-color="#00ff80" title="Spring green #00FF80"></button>
+      <button type="button" class="swatch swatch-25" data-color="#80ffff" title="Pale cyan #80FFFF"></button>
+      <button type="button" class="swatch swatch-26" data-color="#8080ff" title="Periwinkle #8080FF"></button>
+      <button type="button" class="swatch swatch-27" data-color="#ff0080" title="Rose #FF0080"></button>
+      <button type="button" class="swatch swatch-28" data-color="#ff8040" title="Orange #FF8040"></button>
+    </div>
+  </div>
+
+  <!-- ===================== STATUS BAR ===================== -->
+  <div class="statusbar">
+    <span class="statusbar__cell statusbar__cell--wide" id="status-state">Ready.</span>
+    <span class="statusbar__cell" id="status-lives">Lives: 7 / 7</span>
+    <span class="statusbar__cell statusbar__cell--wide" id="status-tips">Pick a job to begin.</span>
+    <span class="statusbar__cell" id="sw-status">offline cache not registered</span>
+  </div>
+</div>
+
+<!-- ===================== DIALOG ===================== -->
+<div class="dialog-overlay hidden" id="dialog-overlay">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+    <div class="dialog__titlebar">
+      <span id="dialog-title">Hangbitch</span>
+      <button type="button" class="dialog__close" id="dialog-close" aria-label="Close dialog"><span aria-hidden="true">&#10005;</span></button>
+    </div>
+    <div class="dialog__body" id="dialog-body"></div>
+    <div class="dialog__buttons" id="dialog-buttons"></div>
+  </div>
+</div>
+
+<script src="crypto.js"></script>
+<script src="default-keys.js"></script>
+<script src="game-logic.js"></script>
+<script src="key-management.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

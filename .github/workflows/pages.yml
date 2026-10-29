@@ -1,0 +1,54 @@
+# Publishes the Hangbitch app (app/) to GitHub Pages.
+#
+# Only the app/ folder is published. The tests, tools, launcher, README, shared
+# notes and your own key backups are never part of the published site.
+#
+# The app ships a built-in key pair in default-keys.js so it works with no
+# setup. That private key is PUBLIC by design once this site is published —
+# anyone who can open the page can decrypt payloads made with the default key.
+# Use "Key settings -> Change key pair" for anything that should stay private;
+# that key is stored only in the browser, never in this repository.
+#
+# One-time setup in the repository: Settings -> Pages -> Build and deployment ->
+# Source: "GitHub Actions". After that every push to main republishes the site;
+# you can also run it by hand from the Actions tab ("Run workflow").
+name: Deploy Hangbitch to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one publish at a time; a newer push cancels an in-flight deployment.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload the app as the site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Relative asset paths mean the site works from a project sub-path
+          # such as https://<user>.github.io/<repo>/ as well as a custom domain.
+          path: app
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

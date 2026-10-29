@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Hangbitch — Hangman in an old drawing program">
+  <!-- A little Paint window: grey chrome, blue title bar, white canvas. -->
+  <rect width="512" height="512" rx="40" fill="#3b6ea5"/>
+
+  <rect x="34" y="46" width="444" height="420" fill="#d4d0c8" stroke="#0a246a" stroke-width="6"/>
+  <rect x="42" y="54" width="428" height="30" fill="#0a246a"/>
+  <rect x="42" y="54" width="200" height="30" fill="#2b5c9e" opacity="0.8"/>
+
+  <!-- window buttons -->
+  <rect x="404" y="60" width="22" height="18" fill="#d4d0c8" stroke="#404040" stroke-width="2"/>
+  <rect x="432" y="60" width="22" height="18" fill="#d4d0c8" stroke="#404040" stroke-width="2"/>
+  <path d="M437 65 l12 8 M449 65 l-12 8" stroke="#404040" stroke-width="2.5"/>
+
+  <!-- white canvas -->
+  <rect x="60" y="96" width="392" height="290" fill="#ffffff" stroke="#808080" stroke-width="4"/>
+
+  <!-- rough, hand-drawn gallows -->
+  <g stroke="#000000" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M92 366 L246 363"/>
+    <path d="M120 367 L117 138"/>
+    <path d="M117 138 L318 142"/>
+    <path d="M313 143 L310 176"/>
+  </g>
+
+  <!-- one arm, a head, a body — as crude as the game itself -->
+  <g stroke="#000000" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <circle cx="310" cy="206" r="30"/>
+    <path d="M296 196 l12 12 M308 196 l-12 12"/>
+    <path d="M322 196 l12 12 M334 196 l-12 12"/>
+    <path d="M298 222 q12 10 24 0"/>
+    <path d="M310 236 L308 306"/>
+    <path d="M309 252 L272 288"/>
+  </g>
+
+  <!-- the beer mug, waiting -->
+  <g>
+    <path d="M336 300 L378 300 L376 348 L338 348 z" fill="#f2c14e" stroke="#000000" stroke-width="6"/>
+    <path d="M333 300 q22 -16 46 0 q-23 9 -46 0 z" fill="#ffffff" stroke="#000000" stroke-width="6"/>
+    <path d="M378 312 q17 12 0 26" fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- 28-swatch palette strip, like the real thing -->
+  <g stroke="#404040" stroke-width="2">
+    <rect x="60"  y="398" width="26" height="26" fill="#000000"/>
+    <rect x="88"  y="398" width="26" height="26" fill="#808080"/>
+    <rect x="116" y="398" width="26" height="26" fill="#800000"/>
+    <rect x="144" y="398" width="26" height="26" fill="#808000"/>
+    <rect x="172" y="398" width="26" height="26" fill="#008000"/>
+    <rect x="200" y="398" width="26" height="26" fill="#008080"/>
+    <rect x="228" y="398" width="26" height="26" fill="#000080"/>
+    <rect x="256" y="398" width="26" height="26" fill="#800080"/>
+    <rect x="284" y="398" width="26" height="26" fill="#ffffff"/>
+    <rect x="312" y="398" width="26" height="26" fill="#c0c0c0"/>
+    <rect x="340" y="398" width="26" height="26" fill="#ff0000"/>
+    <rect x="368" y="398" width="26" height="26" fill="#ffff00"/>
+    <rect x="396" y="398" width="26" height="26" fill="#00ff00"/>
+    <rect x="424" y="398" width="26" height="26" fill="#00ffff"/>
+  </g>
+  <g stroke="#404040" stroke-width="2">
+    <rect x="60"  y="426" width="26" height="26" fill="#0000ff"/>
+    <rect x="88"  y="426" width="26" height="26" fill="#ff00ff"/>
+    <rect x="116" y="426" width="26" height="26" fill="#8080ff"/>
+    <rect x="144" y="426" width="26" height="26" fill="#ff8040"/>
+    <rect x="172" y="426" width="26" height="26" fill="#800000"/>
+    <rect x="200" y="426" width="26" height="26" fill="#804000"/>
+    <rect x="228" y="426" width="26" height="26" fill="#0080ff"/>
+    <rect x="256" y="426" width="26" height="26" fill="#80ffff"/>
+    <rect x="284" y="426" width="26" height="26" fill="#ffff80"/>
+    <rect x="312" y="426" width="26" height="26" fill="#e0a33a"/>
+    <rect x="340" y="426" width="26" height="26" fill="#ff0080"/>
+    <rect x="368" y="426" width="26" height="26" fill="#00ff80"/>
+    <rect x="396" y="426" width="26" height="26" fill="#808040"/>
+    <rect x="424" y="426" width="26" height="26" fill="#004040"/>
+  </g>
+</svg>

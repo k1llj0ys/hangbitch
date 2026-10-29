@@ -1,0 +1,25 @@
+{
+  "name": "Hangbitch",
+  "short_name": "Hangbitch",
+  "description": "Seven-life Hangman and a public-key encryptor dressed up as classic Microsoft Paint. Play a word or a received payload, or encrypt a secret word to send to the host. Everything happens in your browser.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#d4d0c8",
+  "theme_color": "#0a246a",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
