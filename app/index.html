@@ -46,8 +46,8 @@
   <!-- ===================== RIBBON ===================== -->
   <div class="ribbon">
     <div class="ribbon__tabs">
-      <button type="button" class="ribbon__tab is-active" data-tab="file">File</button>
-      <button type="button" class="ribbon__tab" data-tab="home">Home</button>
+      <button type="button" class="ribbon__tab" data-tab="file">File</button>
+      <button type="button" class="ribbon__tab is-active" data-tab="home">Home</button>
       <button type="button" class="ribbon__tab" data-tab="view">View</button>
     </div>
 
@@ -105,6 +105,32 @@
 
       <span class="toolbar__spacer" style="display:inline-flex;flex:1;"></span>
       <span class="toolbar__readout" id="tool-readout">Pencil · #000000</span>
+
+      <!-- Colors group (always visible, like Paint's colors section) -->
+      <div class="ribbon__colors">
+        <div class="ribbon__group">
+          <div class="ribbon__group__label">Colors</div>
+          <div class="palette__mini">
+            <span class="palette__swatch mini active" id="color-mini-1" data-ribcolor="#000000" style="background:#000000"></span>
+            <span class="palette__swatch mini" id="color-mini-2" data-ribcolor="#ffffff" style="background:#ffffff"></span>
+            <span class="palette__swatch mini" id="color-mini-3" data-ribcolor="#808080" style="background:#808080"></span>
+            <span class="palette__swatch mini" id="color-mini-4" data-ribcolor="#ff0000" style="background:#ff0000"></span>
+            <span class="palette__swatch mini" id="color-mini-5" data-ribcolor="#00ff00" style="background:#00ff00"></span>
+            <span class="palette__swatch mini" id="color-mini-6" data-ribcolor="#0000ff" style="background:#0000ff"></span>
+            <span class="palette__swatch mini" id="color-mini-7" data-ribcolor="#ffff00" style="background:#ffff00"></span>
+            <span class="palette__swatch mini" id="color-mini-8" data-ribcolor="#00ffff" style="background:#00ffff"></span>
+            <span class="palette__swatch mini" id="color-mini-9" data-ribcolor="#ff00ff" style="background:#ff00ff"></span>
+            <span class="palette__swatch mini" id="color-mini-10" data-ribcolor="#800000" style="background:#800000"></span>
+            <span class="palette__swatch mini" id="color-mini-11" data-ribcolor="#008000" style="background:#008000"></span>
+            <span class="palette__swatch mini" id="color-mini-12" data-ribcolor="#000080" style="background:#000080"></span>
+          </div>
+          <div class="palette__wells">
+            <div class="palette__well" id="color-current" style="background:#000000"></div>
+            <div class="palette__well palette__well--secondary" style="background:#ffffff"></div>
+          </div>
+          <button type="button" class="tbtn" id="btn-edit-colors" title="Edit colors" style="width:auto;height:auto;padding:2px 6px;font-size:11px;">Edit colors</button>
+        </div>
+      </div>
     </div>
 
     <!-- View tab panel -->
@@ -121,33 +147,6 @@
         </button>
       </div>
     </div>
-
-    <!-- Colors group (always visible, like Paint's colors section) -->
-    <div class="ribbon__colors">
-      <div class="ribbon__group">
-        <div class="ribbon__group__label">Colors</div>
-        <div class="palette__mini">
-          <span class="palette__swatch mini active" id="color-mini-1" data-ribcolor="#000000" style="background:#000000"></span>
-          <span class="palette__swatch mini" id="color-mini-2" data-ribcolor="#ffffff" style="background:#ffffff"></span>
-          <span class="palette__swatch mini" id="color-mini-3" data-ribcolor="#808080" style="background:#808080"></span>
-          <span class="palette__swatch mini" id="color-mini-4" data-ribcolor="#ff0000" style="background:#ff0000"></span>
-          <span class="palette__swatch mini" id="color-mini-5" data-ribcolor="#00ff00" style="background:#00ff00"></span>
-          <span class="palette__swatch mini" id="color-mini-6" data-ribcolor="#0000ff" style="background:#0000ff"></span>
-          <span class="palette__swatch mini" id="color-mini-7" data-ribcolor="#ffff00" style="background:#ffff00"></span>
-          <span class="palette__swatch mini" id="color-mini-8" data-ribcolor="#00ffff" style="background:#00ffff"></span>
-          <span class="palette__swatch mini" id="color-mini-9" data-ribcolor="#ff00ff" style="background:#ff00ff"></span>
-          <span class="palette__swatch mini" id="color-mini-10" data-ribcolor="#800000" style="background:#800000"></span>
-          <span class="palette__swatch mini" id="color-mini-11" data-ribcolor="#008000" style="background:#008000"></span>
-          <span class="palette__swatch mini" id="color-mini-12" data-ribcolor="#000080" style="background:#000080"></span>
-        </div>
-        <div class="palette__wells">
-          <div class="palette__well" id="color-current" style="background:#000000"></div>
-          <div class="palette__well palette__well--secondary" style="background:#ffffff"></div>
-        </div>
-        <button type="button" class="tbtn" id="btn-edit-colors" title="Edit colors" style="width:auto;height:auto;padding:2px 6px;font-size:11px;">Edit colors</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ===================== MENU BAR (kept for app.js compatibility, styled as ribbon tabs) ===================== -->
   <nav class="menubar" id="menubar" aria-label="Main menu" style="display:none;">

@@ -145,7 +145,7 @@ body.maximized .win {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 .ribbon__panel.is-active { display: flex; }
 .ribbon__panel.hidden { display: none !important; }
