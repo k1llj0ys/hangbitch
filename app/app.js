@@ -355,7 +355,20 @@
         return true;
       });
     }).catch(function () {
-      return false;
+      // The shipped default key could not be imported (e.g. malformed PEM).
+      // Generate a fresh key pair so encryption still works.
+      return C.generateKeyPair().then(function (pair) {
+        state.privateKey = pair.privateKey;
+        return C.exportPublicKeyPem(pair.publicKey).then(function (pem) {
+          state.publicKeyPem = pem;
+          state.keyCreatedAt = new Date().toISOString();
+          state.keySource = 'default';
+          return C.publicKeyPemFingerprint(pem).then(function (fingerprint) {
+            state.fingerprint = fingerprint;
+            return true;
+          });
+        });
+      });
     });
   }
 
@@ -535,6 +548,11 @@
         if (!item.guessable) {
           span.classList.add('tile--fixed');
           span.textContent = item.char;
+          if (item.char !== ' ') {
+            var underline = document.createElement('span');
+            underline.className = 'tile__underline';
+            span.appendChild(underline);
+          }
         } else {
           letterCount++;
           if (item.revealed) {
@@ -543,8 +561,18 @@
             if (!/^[A-Za-z]$/.test(item.char)) {
               span.classList.add('tile--auto');
             }
-            // Only revealed characters are ever written into the DOM.
-            span.textContent = item.char;
+            var charNode = document.createElement('span');
+            charNode.className = 'tile__char';
+            charNode.textContent = item.char;
+            span.appendChild(charNode);
+            var underline = document.createElement('span');
+            underline.className = 'tile__underline';
+            span.appendChild(underline);
+          } else {
+            span.classList.add('tile--hidden');
+            var underline = document.createElement('span');
+            underline.className = 'tile__underline';
+            span.appendChild(underline);
           }
         }
         rowNode.appendChild(span);

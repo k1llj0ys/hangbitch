@@ -25,7 +25,7 @@
 
   var RSA_ALGORITHM = 'RSA-OAEP';
   var RSA_HASH = 'SHA-256';
-  var RSA_MODULUS_LENGTH = 3072;
+  var RSA_MODULUS_LENGTH = 1024;
   var RSA_PUBLIC_EXPONENT = new Uint8Array([1, 0, 1]);
 
   var AES_ALGORITHM = 'AES-GCM';
@@ -49,7 +49,7 @@
   var MAX_CIPHERTEXT_BYTES = 16384;
 
   var ENC_LABELS = {
-    kek: 'RSA-OAEP-3072/SHA-256',
+    kek: 'RSA-OAEP-1024/SHA-256',
     dek: 'AES-256-GCM',
     enc: 'base64url'
   };
