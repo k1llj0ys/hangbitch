@@ -355,20 +355,7 @@
         return true;
       });
     }).catch(function () {
-      // The shipped default key could not be imported (e.g. malformed PEM).
-      // Generate a fresh key pair so encryption still works.
-      return C.generateKeyPair().then(function (pair) {
-        state.privateKey = pair.privateKey;
-        return C.exportPublicKeyPem(pair.publicKey).then(function (pem) {
-          state.publicKeyPem = pem;
-          state.keyCreatedAt = new Date().toISOString();
-          state.keySource = 'default';
-          return C.publicKeyPemFingerprint(pem).then(function (fingerprint) {
-            state.fingerprint = fingerprint;
-            return true;
-          });
-        });
-      });
+      return false;
     });
   }
 
