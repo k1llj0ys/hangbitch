@@ -710,7 +710,8 @@
     }
 
     if (outcome.result === 'correct') {
-      setMessage('Yes — ' + letter + ' is in there.', 'good');
+      setMessage('', null);
+      showThoughtBubble('win', null, 'Nice!');
     } else {
       showThoughtBubble('loss', null, 'BOBO!');
       shakeStage();
