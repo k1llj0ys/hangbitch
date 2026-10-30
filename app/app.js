@@ -93,7 +93,8 @@
     color: '#000000',
     doodling: false,
     activeDoodle: null,
-    gameOverTimer: null    // pending game-over dialog timer
+    gameOverTimer: null,    // pending game-over dialog timer
+    messageTimer: null      // pending message fade-out timer
   };
 
   var MENU_IDS = ['menu-file', 'menu-edit', 'menu-view', 'menu-help'];
@@ -185,11 +186,36 @@
     }
   }
 
-  function setMessage(text, kind) {
-    el['message'].textContent = text || '';
-    el['message'].classList.remove('message--good', 'message--bad', 'message--info');
+  function setMessage(text, kind, duration) {
+    // Cancel any existing message fade-out timer.
+    if (state.messageTimer) {
+      clearTimeout(state.messageTimer);
+      state.messageTimer = null;
+    }
+    hideThoughtBubbles();
+
+    var msg = el['message'];
+    msg.classList.remove('message--good', 'message--bad', 'message--info', 'message--fade-out');
     if (kind) {
-      el['message'].classList.add('message--' + kind);
+      msg.classList.add('message--' + kind);
+    }
+    msg.textContent = text || '';
+
+    // Immediate clear when text is empty.
+    if (!text) {
+      return;
+    }
+
+    // Default display duration is 2 seconds.
+    if (duration === undefined) {
+      duration = 2000;
+    }
+
+    if (duration > 0) {
+      state.messageTimer = setTimeout(function () {
+        state.messageTimer = null;
+        msg.classList.add('message--fade-out');
+      }, duration);
     }
   }
 
@@ -440,10 +466,17 @@
     }, 500);
   }
 
-  function showThoughtBubble(kind, answer, customBody) {
+  function showThoughtBubble(kind, answer, customBody, duration) {
+    // Cancel any existing message fade-out timer.
+    if (state.messageTimer) {
+      clearTimeout(state.messageTimer);
+      state.messageTimer = null;
+    }
+
     [el['thought-bubble-win'], el['thought-bubble-loss']].forEach(function (b) {
       if (b) {
         b.classList.add('hidden');
+        b.classList.remove('thought-bubble--fade-out');
       }
     });
     var bubble = el['thought-bubble-' + kind];
@@ -452,7 +485,7 @@
     }
     var body = bubble.querySelector('.thought-bubble__body');
     if (body) {
-      body.textContent = customBody || (kind === 'win' ? 'Nice one brox!' : 'BOBO!');
+      body.textContent = customBody || (kind === 'win' ? 'Nice ka brox!' : 'Mamatay tas imong ka-bugo brox!');
     }
     if (kind === 'loss' && el['thought-bubble-answer']) {
       el['thought-bubble-answer'].textContent = customBody
@@ -463,6 +496,21 @@
     bubble.classList.remove('thought-bubble--pop');
     void bubble.offsetWidth;
     bubble.classList.add('thought-bubble--pop');
+
+    // Default display duration is 2 seconds.
+    if (duration === undefined) {
+      duration = 2000;
+    }
+    if (duration > 0) {
+      state.messageTimer = setTimeout(function () {
+        state.messageTimer = null;
+        bubble.classList.add('thought-bubble--fade-out');
+        setTimeout(function () {
+          bubble.classList.add('hidden');
+          bubble.classList.remove('thought-bubble--fade-out');
+        }, 300);
+      }, duration);
+    }
   }
 
   function hideThoughtBubbles() {
@@ -623,18 +671,22 @@
       return;
     }
 
-    // Cancel any pending game-over timer
+    // Cancel any pending game-over timer and message timer.
     if (state.gameOverTimer) {
       clearTimeout(state.gameOverTimer);
       state.gameOverTimer = null;
     }
+    if (state.messageTimer) {
+      clearTimeout(state.messageTimer);
+      state.messageTimer = null;
+    }
 
     var secret = { word: state.round.word, hint: state.round.hint };
     startRound(secret);
-    setMessage('Round restarted. Same secret, fresh lives.', 'info');
+    setMessage('', null);
     setState('Round restarted.');
     hideThoughtBubbles();
-    showThoughtBubble('loss', null, "Mamatay ta's imong ka-bugo brox!");
+    showThoughtBubble('loss', null, 'Taronga brox ha');
   }
 
   function handleGuess(letter) {
@@ -660,7 +712,7 @@
     if (outcome.result === 'correct') {
       setMessage('Yes — ' + letter + ' is in there.', 'good');
     } else {
-      setMessage('No ' + letter + '. That costs a life.', 'bad');
+      showThoughtBubble('loss', null, 'BOBO!');
       shakeStage();
     }
 
@@ -685,8 +737,8 @@
     el['btn-hint'].disabled = !round.hint;
 
     if (result === 'won') {
-      showThoughtBubble('win');
-      setMessage('Solved! ' + (round.lives - round.wrong) + ' of ' + round.lives + ' lives left. Everyone drinks.', 'good');
+      setMessage('', null);
+      showThoughtBubble('win', null, 'Nice ka brox!');
       setState('Round won.');
       setTips('You solved it. Everyone drinks.');
       openMessageDialog('Hangbitch — You win!', [
@@ -697,14 +749,18 @@
         { label: 'New game…', primary: true, onClick: openPlayView }
       ]);
     } else {
-      // Cancel any pending game-over timer first
+      // Cancel any pending game-over timer and message timer first.
       if (state.gameOverTimer) {
         clearTimeout(state.gameOverTimer);
         state.gameOverTimer = null;
       }
+      if (state.messageTimer) {
+        clearTimeout(state.messageTimer);
+        state.messageTimer = null;
+      }
 
-      setMessage('Out of lives — and out of luck. The beer mug appears.', 'bad');
-      showThoughtBubble('loss', L.answer(round));
+      setMessage('', null);
+      showThoughtBubble('loss', L.answer(round), 'Mamatay tas imong ka-bugo brox!');
       setState('Round lost.');
       setTips('The beer mug appeared.');
 
@@ -776,10 +832,14 @@
    * ------------------------------------------------------------------ */
 
   function openPlayView() {
-    // Cancel any pending game-over timer
+    // Cancel any pending game-over timer and message timer.
     if (state.gameOverTimer) {
       clearTimeout(state.gameOverTimer);
       state.gameOverTimer = null;
+    }
+    if (state.messageTimer) {
+      clearTimeout(state.messageTimer);
+      state.messageTimer = null;
     }
 
     showView('play');

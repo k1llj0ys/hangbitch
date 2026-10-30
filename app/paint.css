@@ -453,6 +453,10 @@ textarea[readonly] { background: #f4f4f4; }
 .thought-bubble:not(.hidden) {
   animation: hb-bubble-pop 0.25s ease-out forwards;
 }
+.thought-bubble--fade-out {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
 .thought-bubble--win {
   background: #e6ffe6;
   border-color: #005f00;
@@ -600,10 +604,11 @@ textarea[readonly] { background: #f4f4f4; }
   display: none;
 }
 
-.message { min-height: 18px; padding: 4px 0; }
+.message { min-height: 18px; padding: 4px 0; opacity: 1; transition: opacity 0.3s ease; }
 .message--good { color: #005f00; font-weight: bold; }
 .message--bad { color: #a00000; font-weight: bold; }
 .message--info { color: var(--title-a); }
+.message--fade-out { opacity: 0; }
 
 /* --------------------------------------------------------------- keyboard */
 .letter-grid {
