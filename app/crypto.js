@@ -48,6 +48,19 @@
   var MAX_WRAPPED_KEY_BYTES = 1024;
   var MAX_CIPHERTEXT_BYTES = 16384;
 
+  /* Shared-key obfuscation for game words (workplace-game sharing, not real security) */
+  var SIMPLE_KEY = new Uint8Array([0x4c, 0x45, 0x53, 0x54, 0x45, 0x52, 0x43, 0x55, 0x54, 0x45]); // "LESTERCUTE"
+
+  function xorCrypt(data) {
+    var arr = toUint8(data);
+    var out = new Uint8Array(arr.length);
+    var klen = SIMPLE_KEY.length;
+    for (var i = 0; i < arr.length; i++) {
+      out[i] = arr[i] ^ SIMPLE_KEY[i % klen];
+    }
+    return out;
+  }
+
   var ENC_LABELS = {
     kek: 'RSA-OAEP-3072/SHA-256',
     dek: 'AES-256-GCM',
@@ -604,13 +617,13 @@
    * Useful for showing "this was encrypted for key <kid>".
    */
   function describePayload(payloadText) {
-    var parsed = parsePayload(payloadText);
+    var obj = parsePayload(payloadText);
     return {
-      version: parsed.envelope.v,
-      kid: parsed.envelope.kid,
-      created: parsed.envelope.created || null,
-      fingerprint: formatFingerprint(parsed.envelope.kid),
-      algorithms: parsed.envelope.alg
+      version: obj.v || null,
+      kid: null,
+      created: null,
+      fingerprint: null,
+      algorithms: null
     };
   }
 
@@ -630,11 +643,8 @@
         fail('PAYLOAD_FORMAT');
       }
       try {
-        json = decodeText(b64urlToBytes(encoded));
+        json = decodeText(xorCrypt(b64urlToBytes(encoded)));
       } catch (e) {
-        if (e instanceof BHError) {
-          throw e;
-        }
         fail('PAYLOAD_FORMAT');
       }
     } else if (raw.charAt(0) === '{') {
@@ -651,22 +661,21 @@
     } catch (e) {
       fail('PAYLOAD_JSON');
     }
-    return validateEnvelope(obj);
+    return obj;
   }
 
   /* ------------------------------------------------------------------ *
-   * Hybrid encryption: AES-256-GCM data key, RSA-OAEP key wrap
+   * Simple shared-key obfuscation for game words
    * ------------------------------------------------------------------ */
 
   /**
-   * Encrypt a secret for a recipient public key.
-   * @param {string} publicKeyPem recipient public key (SPKI PEM or bare base64)
+   * Obfuscate a secret for sharing (simple XOR with a built-in key, not real
+   * encryption). Good enough to keep the answer hidden from casual readers.
+   * @param {string} publicKeyPem ignored (kept for API compatibility)
    * @param {{word: string, hint?: string}} secret
    * @returns {Promise<string>} transport payload (LESTERCUTE.<base64url>)
    */
   function encryptForRecipient(publicKeyPem, secret) {
-    requireCrypto();
-
     var word = String(secret && secret.word != null ? secret.word : '').trim();
     var hint = String(secret && secret.hint != null ? secret.hint : '').trim();
 
@@ -679,106 +688,36 @@
     if (hint.length > MAX_HINT_LENGTH) {
       fail('HINT_TOO_LONG');
     }
-    if (!publicKeyPem) {
-      fail('MISSING_PUBLIC_KEY');
-    }
 
-    var aesKey;
-    var iv;
-    var publicKey;
-    var kid;
-
-    return importPublicKeyPem(publicKeyPem)
-      .then(function (imported) {
-        publicKey = imported;
-        return publicKeyFingerprint(publicKey);
-      })
-      .then(function (fp) {
-        kid = fp;
-        return root.crypto.subtle.generateKey({ name: AES_ALGORITHM, length: AES_KEY_LENGTH }, true, ['encrypt', 'decrypt']);
-      })
-      .then(function (key) {
-        aesKey = key;
-        iv = randomBytes(GCM_IV_BYTES);
-        var plaintext = JSON.stringify({
-          type: 'LESTERCUTE-SECRET',
-          v: ENVELOPE_VERSION,
-          word: word,
-          hint: hint
-        });
-        return root.crypto.subtle.encrypt({ name: AES_ALGORITHM, iv: iv }, aesKey, encodeText(plaintext));
-      })
-      .then(function (ciphertext) {
-        return root.crypto.subtle.exportKey('raw', aesKey).then(function (rawKey) {
-          return root.crypto.subtle.encrypt({ name: RSA_ALGORITHM }, publicKey, rawKey).then(function (wrapped) {
-            var envelope = buildEnvelope({
-              kid: kid,
-              wrapped: bytesToB64url(wrapped),
-              iv: bytesToB64url(iv),
-              ct: bytesToB64url(ciphertext),
-              created: new Date().toISOString()
-            });
-            return PAYLOAD_PREFIX + bytesToB64url(encodeText(JSON.stringify(envelope)));
-          });
-        });
-      });
+    var plaintext = JSON.stringify({
+      type: 'LESTERCUTE-SECRET',
+      v: ENVELOPE_VERSION,
+      word: word,
+      hint: hint
+    });
+    var encrypted = xorCrypt(encodeText(plaintext));
+    return Promise.resolve(PAYLOAD_PREFIX + bytesToB64url(encrypted));
   }
 
   /**
-   * Decrypt a payload with the loaded private key.
+   * Deobfuscate a payload created by encryptForRecipient.
    * @param {string} payloadText
-   * @param {CryptoKey} privateKey
-   * @param {string} [expectedFingerprint] active key fingerprint (hex)
+   * @param {CryptoKey} [privateKey] ignored (kept for API compatibility)
+   * @param {string} [expectedFingerprint] ignored (kept for API compatibility)
    * @returns {Promise<{word: string, hint: string, kid: string, created: string|null}>}
    */
   function decryptPayload(payloadText, privateKey, expectedFingerprint) {
-    requireCrypto();
-    if (!privateKey) {
-      fail('NO_PRIVATE_KEY');
+    var obj = parsePayload(payloadText);
+
+    if (!obj || typeof obj !== 'object' || typeof obj.word !== 'string' || !obj.word.trim()) {
+      fail('BAD_PLAINTEXT');
     }
-
-    var parsed = parsePayload(payloadText);
-
-    if (expectedFingerprint && parsed.envelope.kid !== expectedFingerprint) {
-      fail('KID_MISMATCH');
-    }
-
-    var aesKey;
-    return root.crypto.subtle.decrypt({ name: RSA_ALGORITHM }, privateKey, parsed.wrapped)
-      .catch(function () {
-        fail('DECRYPT_FAILED');
-      })
-      .then(function (rawKey) {
-        return root.crypto.subtle.importKey('raw', rawKey, { name: AES_ALGORITHM }, false, ['decrypt']);
-      })
-      .then(function (key) {
-        aesKey = key;
-        return root.crypto.subtle.decrypt({ name: AES_ALGORITHM, iv: parsed.iv }, aesKey, parsed.ct);
-      })
-      .catch(function (e) {
-        if (e instanceof BHError) {
-          throw e;
-        }
-        fail('DECRYPT_FAILED');
-      })
-      .then(function (plaintextBuffer) {
-        var text = decodeText(plaintextBuffer);
-        var obj;
-        try {
-          obj = JSON.parse(text);
-        } catch (e) {
-          fail('BAD_PLAINTEXT');
-        }
-        if (!obj || typeof obj !== 'object' || typeof obj.word !== 'string' || !obj.word.trim()) {
-          fail('BAD_PLAINTEXT');
-        }
-        return {
-          word: obj.word,
-          hint: typeof obj.hint === 'string' ? obj.hint : '',
-          kid: parsed.envelope.kid,
-          created: parsed.envelope.created || null
-        };
-      });
+    return Promise.resolve({
+      word: obj.word,
+      hint: typeof obj.hint === 'string' ? obj.hint : '',
+      kid: null,
+      created: null
+    });
   }
 
   /* ------------------------------------------------------------------ *

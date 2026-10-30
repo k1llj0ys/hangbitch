@@ -820,32 +820,17 @@
       setStatus(el['import-status'], 'Paste the payload someone sent you first.', 'error');
       return;
     }
-    if (!state.privateKey) {
-      setStatus(el['import-status'], C.MESSAGES.NO_PRIVATE_KEY, 'error');
-      return;
-    }
 
-    // Show which key the payload targets before touching the private key.
     try {
       var meta = C.describePayload(text);
-      el['payload-meta'].textContent = 'Payload v' + meta.version + ' for key ' + C.formatFingerprint(meta.kid, 4) +
-        (meta.created ? ' · created ' + meta.created : '');
-      if (state.fingerprint && meta.kid !== state.fingerprint) {
-        setStatus(
-          el['import-status'],
-          C.MESSAGES.KID_MISMATCH + ' (payload: ' + C.formatFingerprint(meta.kid, 4) +
-            ', this app: ' + C.formatFingerprint(state.fingerprint, 4) + ')',
-          'error'
-        );
-        return;
-      }
+      el['payload-meta'].textContent = 'Payload v' + (meta.version || '?') + ' (simple share format)';
     } catch (metaErr) {
       setStatus(el['import-status'], describeError(metaErr), 'error');
       return;
     }
 
     busy(true);
-    C.decryptPayload(text, state.privateKey, state.fingerprint)
+    C.decryptPayload(text, null, null)
       .then(function (secret) {
         // Clear the ciphertext box; the plaintext now lives only in the round.
         el['payload-input'].value = '';
@@ -896,13 +881,9 @@
       setStatus(el['form-status'], 'Type the secret word first.', 'error');
       return;
     }
-    if (!state.publicKeyPem) {
-      setStatus(el['form-status'], 'No public key is available to encrypt with.', 'error');
-      return;
-    }
 
     busy(true);
-    C.encryptForRecipient(state.publicKeyPem, { word: word, hint: hint })
+    C.encryptForRecipient(null, { word: word, hint: hint })
       .then(function (payloadText) {
         el['payload'].value = payloadText;
         el['btn-copy'].disabled = false;
@@ -1572,9 +1553,7 @@
     var cryptoReady = C.isAvailable();
     if (!cryptoReady) {
       showEnvironmentWarning();
-      el['btn-encrypt'].disabled = true;
       el['btn-copy'].disabled = true;
-      el['btn-import'].disabled = true;
       el['btn-generate'].disabled = true;
       el['btn-restore'].disabled = true;
       el['btn-use-default'].disabled = true;
