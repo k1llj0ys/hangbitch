@@ -20,7 +20,7 @@
    * Constants
    * ------------------------------------------------------------------ */
 
-  var PAYLOAD_PREFIX = 'LESTERCUTE.';
+  var PAYLOAD_PREFIX = 'HANGBITCH.';
   var ENVELOPE_VERSION = 1;
 
   var RSA_ALGORITHM = 'RSA-OAEP';
@@ -37,7 +37,7 @@
   var PBKDF2_ITERATIONS = 600000;
   var PBKDF2_SALT_BYTES = 16;
 
-  var BACKUP_TYPE = 'LESTERCUTE-PRIVATE-KEY-BACKUP';
+  var BACKUP_TYPE = 'HANGBITCH-PRIVATE-KEY-BACKUP';
   var BACKUP_VERSION = 1;
 
   var MIN_PASSPHRASE_LENGTH = 8;
@@ -49,7 +49,7 @@
   var MAX_CIPHERTEXT_BYTES = 16384;
 
   /* Shared-key obfuscation for game words (workplace-game sharing, not real security) */
-  var SIMPLE_KEY = new Uint8Array([0x4c, 0x45, 0x53, 0x54, 0x45, 0x52, 0x43, 0x55, 0x54, 0x45]); // "LESTERCUTE"
+  var SIMPLE_KEY = new Uint8Array([0x4c, 0x45, 0x53, 0x54, 0x45, 0x52, 0x43, 0x55, 0x54, 0x45]); // "HANGBITCH"
 
   function xorCrypt(data) {
     var arr = toUint8(data);
@@ -673,7 +673,7 @@
    * encryption). Good enough to keep the answer hidden from casual readers.
    * @param {string} publicKeyPem ignored (kept for API compatibility)
    * @param {{word: string, hint?: string}} secret
-   * @returns {Promise<string>} transport payload (LESTERCUTE.<base64url>)
+   * @returns {Promise<string>} transport payload (HANGBITCH.<base64url>)
    */
   function encryptForRecipient(publicKeyPem, secret) {
     var word = String(secret && secret.word != null ? secret.word : '').trim();
@@ -690,7 +690,7 @@
     }
 
     var plaintext = JSON.stringify({
-      type: 'LESTERCUTE-SECRET',
+      type: 'HANGBITCH-SECRET',
       v: ENVELOPE_VERSION,
       word: word,
       hint: hint

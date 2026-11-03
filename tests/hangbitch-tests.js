@@ -93,9 +93,9 @@ const cases = [
     name: '4. the crypto core, payload format and built-in key are unchanged',
     fn: async () => {
       const C = loadNamespace('app/crypto.js', 'BHCrypto');
-      eq(C.PAYLOAD_PREFIX, 'LESTERCUTE.', 'the payload format is unchanged');
+      eq(C.PAYLOAD_PREFIX, 'HANGBITCH.', 'the payload format is unchanged');
       eq(C.ENVELOPE_VERSION, 1, 'the envelope version is unchanged');
-      eq(C.BACKUP_TYPE, 'LESTERCUTE-PRIVATE-KEY-BACKUP', 'key backups stay interchangeable');
+      eq(C.BACKUP_TYPE, 'HANGBITCH-PRIVATE-KEY-BACKUP', 'key backups stay interchangeable');
 
       const keys = loadNamespace('app/default-keys.js', 'BH_DEFAULT_KEYS');
       includes(keys.publicKeyPem, '-----BEGIN PUBLIC KEY-----', 'the built-in public key is present');
@@ -282,7 +282,7 @@ const cases = [
       // Self-contained: Hangbitch encrypts to its built-in public key and reads
       // it back with the matching built-in private key.
       const own = await hang.encryptForRecipient(keys.publicKeyPem, { word: 'PAINT IN A HANGMAN', hint: 'doodle' });
-      includes(own, 'LESTERCUTE.', 'the payload uses the documented transport prefix');
+      includes(own, 'HANGBITCH.', 'the payload uses the documented transport prefix');
       const readOwn = await hang.decryptPayload(own, hangPrivate, fpHang);
       eq(readOwn.word, 'PAINT IN A HANGMAN', 'Hangbitch reads its own payload');
       eq(readOwn.hint, 'doodle', 'the hint survives the round trip');
