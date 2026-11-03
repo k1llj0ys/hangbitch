@@ -1,26 +1,28 @@
 /*
  * Hangbitch — service worker.
  *
- * Purpose: let Hangbitch start from the local cache when the machine is offline.
- * It only ever caches same-origin files that ship with Hangbitch. Requests to
- * any other origin are ignored entirely.
+ * Purpose: let Hangbitch start from the local cache when the machine is offline
+ * and keep the deployed shell up to date without asking users to clear their
+ * browser cache.
  *
- * This worker registers under the Hangbitch scope, uses its own cache name, and
- * its activate handler only ever deletes caches it owns, so a stale Hangbitch
- * shell can never be served alongside a fresh one.
+ * Cache policy:
+ *   * HTML navigations (index.html) — network first, cached copy as offline
+ *     fallback; the network response is stored so the next offline load is fresh.
+ *   * Static shell assets (CSS, JS, manifest, icon) — cache first; assets are
+ *     precached at install and refreshed whenever the cache version changes.
+ *   * Anything cross-origin or non-GET is ignored.
+ *
+ * Only caches it owns (hangbitch-*) are ever created or deleted, so user data
+ * (keys, settings, in-memory round state) is never touched.
  */
 'use strict';
 
-// Bump this whenever a Hangbitch shell file changes: the activate handler
-// deletes every older cache, so a stale app.js/paint.css can never keep being
-// served.
-var CACHE_NAME = 'hangbitch-shell-v1';
+var CACHE_NAME = 'hangbitch-shell-v2';
 
 // Only ever manages caches whose name starts with this prefix.
 var CACHE_PREFIX = 'hangbitch-';
 
 var SHELL = [
-  './',
   './index.html',
   './paint.css',
   './app.js',
@@ -41,8 +43,6 @@ self.addEventListener('install', function (event) {
           return null;
         });
       }));
-    }).then(function () {
-      return self.skipWaiting();
     })
   );
 });
@@ -51,17 +51,30 @@ self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys().then(function (names) {
       return Promise.all(names.map(function (name) {
-        // Leave every cache that is not ours alone.
-        if (name === CACHE_NAME || name.indexOf(CACHE_PREFIX) !== 0) {
-          return null;
+        // Leave every cache that is not ours alone. Delete obsolete Hangbitch
+        // shells so a stale app.js/paint.css can never keep being served.
+        if (name !== CACHE_NAME && name.indexOf(CACHE_PREFIX) === 0) {
+          return caches.delete(name);
         }
-        return caches.delete(name);
+        return null;
       }));
     }).then(function () {
       return self.clients.claim();
     })
   );
 });
+
+// The page can ask the waiting worker to skip waiting and take over (for
+// example when the user clicks "Reload" on the update notice).
+self.addEventListener('message', function (event) {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+function isNavigation(request) {
+  return request.mode === 'navigate';
+}
 
 self.addEventListener('fetch', function (event) {
   var request = event.request;
@@ -82,6 +95,30 @@ self.addEventListener('fetch', function (event) {
     return;
   }
 
+  if (isNavigation(request)) {
+    // HTML: network first so the latest deployed HTML is always served.
+    // Fall back to the cached shell (or index.html) when offline.
+    event.respondWith(
+      fetch(request).then(function (response) {
+        if (response && response.ok && response.type === 'basic') {
+          var copy = response.clone();
+          caches.open(CACHE_NAME).then(function (cache) {
+            cache.put(request, copy).catch(function () {
+              return null;
+            });
+          });
+        }
+        return response;
+      }).catch(function () {
+        return caches.match(request).then(function (cached) {
+          return cached || caches.match('./index.html');
+        });
+      })
+    );
+    return;
+  }
+
+  // Static assets: cache first, then network, then store the network copy.
   event.respondWith(
     caches.match(request).then(function (cached) {
       if (cached) {
@@ -98,10 +135,6 @@ self.addEventListener('fetch', function (event) {
         }
         return response;
       }).catch(function () {
-        // Offline and not cached: fall back to the app shell when navigating.
-        if (request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
         return Response.error();
       });
     })

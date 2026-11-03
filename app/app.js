@@ -97,6 +97,10 @@
     messageTimer: null      // pending message fade-out timer
   };
 
+  // Service-worker update lifecycle state.
+  var swUpdating = false;    // set while an update reload is in flight (prevents loops)
+  var updateWorker = null;   // waiting worker ready to be activated
+
   var MENU_IDS = ['menu-file', 'menu-edit', 'menu-view', 'menu-help'];
 
   var el = {};
@@ -1576,23 +1580,98 @@
    * Service worker (PWA, optional)
    * ------------------------------------------------------------------ */
 
+  function isGameActive() {
+    return !el['view-game'].classList.contains('hidden') && state.round;
+  }
+
+  function swStatus(text) {
+    if (el['sw-status']) {
+      el['sw-status'].textContent = text;
+    }
+  }
+
+  function showUpdateBanner(show) {
+    var banner = document.getElementById('sw-update');
+    if (!banner) {
+      return;
+    }
+    banner.classList.toggle('hidden', !show);
+  }
+
+  function activateUpdate() {
+    if (swUpdating || !updateWorker) {
+      return;
+    }
+    swUpdating = true;
+    swStatus('update available — activating…');
+    // Ask the waiting worker to skip waiting and claim this page. When it takes
+    // control, a 'controllerchange' event fires and we reload once to run the
+    // fresh shell (latest HTML, CSS and JS) from the server.
+    updateWorker.postMessage({ type: 'SKIP_WAITING' });
+  }
+
   function registerServiceWorker() {
     var status = el['sw-status'];
     if (!status) {
       return;
     }
     if (!('serviceWorker' in navigator)) {
-      status.textContent = 'offline cache unavailable in this browser (app still works)';
+      swStatus('offline cache unavailable in this browser (app still works)');
       return;
     }
     if (!K.isSecureContextLike()) {
-      status.textContent = 'offline cache needs http://127.0.0.1 or https (app still works)';
+      swStatus('offline cache needs http://127.0.0.1 or https (app still works)');
       return;
     }
-    navigator.serviceWorker.register('service-worker.js').then(function () {
-      status.textContent = 'offline cache active';
+
+    navigator.serviceWorker.register('service-worker.js').then(function (registration) {
+      swStatus('offline cache active');
+
+      // Detect a newly installed (updated) worker and keep it ready to activate.
+      registration.onupdatefound = function () {
+        var worker = registration.installing;
+        if (!worker) {
+          return;
+        }
+        updateWorker = worker;
+        worker.addEventListener('statechange', function () {
+          if (worker.state === 'installed') {
+            swStatus('update available');
+            showUpdateBanner(true);
+            // Activate promptly when it is safe (not mid-game); otherwise the
+            // user clicks Reload on the banner when they are ready.
+            if (!isGameActive()) {
+              activateUpdate();
+            }
+          }
+        });
+      };
+
+      // A new worker has taken control of this page: reload once to run the
+      // fresh shell (latest HTML, CSS and JS) from the server.
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (swUpdating) {
+          swUpdating = false;
+          location.reload();
+        }
+      });
+
+      // Banner controls.
+      var reloadBtn = document.getElementById('sw-update-reload');
+      var dismissBtn = document.getElementById('sw-update-dismiss');
+      if (reloadBtn) {
+        reloadBtn.addEventListener('click', function () {
+          showUpdateBanner(false);
+          activateUpdate();
+        });
+      }
+      if (dismissBtn) {
+        dismissBtn.addEventListener('click', function () {
+          showUpdateBanner(false);
+        });
+      }
     }).catch(function () {
-      status.textContent = 'offline cache could not start (app still works)';
+      swStatus('offline cache could not start (app still works)');
     });
   }
 

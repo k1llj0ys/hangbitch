@@ -12,6 +12,45 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
 <link rel="apple-touch-icon" href="assets/icon.svg">
+<style>
+  #sw-update {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #d4d0c8;
+    border: 1px solid #404040;
+    color: #0a246a;
+    padding: 6px 10px;
+    font-size: 12px;
+    z-index: 1000;
+    border-radius: 4px;
+    box-shadow: 2px 2px 0 #404040;
+    line-height: 1.4;
+  }
+  #sw-update.hidden {
+    display: none;
+  }
+  #sw-update button {
+    background: #0a246a;
+    color: #ffffff;
+    border: none;
+    padding: 2px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-left: 6px;
+    border-radius: 2px;
+  }
+  #sw-update-dismiss {
+    background: transparent;
+    color: #0a246a;
+    border: 1px solid #0a246a;
+    padding: 1px 6px;
+    margin-left: 4px;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+</style>
 </head>
 <body>
 <noscript>
@@ -621,6 +660,14 @@
     <span class="statusbar__cell" id="status-lives">Lives: 7 / 7</span>
     <span class="statusbar__cell statusbar__cell--wide" id="status-tips">Pick a job to begin.</span>
     <span class="statusbar__cell" id="sw-status">offline cache not registered</span>
+  </div>
+
+  <!-- Update notice: shown when a new service worker is waiting to activate. -->
+  <div id="sw-update" class="hidden" role="alert" aria-live="polite">
+    <span id="sw-update-text">Update available —
+      <button type="button" id="sw-update-reload">Reload</button>
+    </span>
+    <button type="button" id="sw-update-dismiss" aria-label="Dismiss update notice">×</button>
   </div>
 </div>
 
