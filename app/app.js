@@ -1652,6 +1652,14 @@
     navigator.serviceWorker.register('service-worker.js').then(function (registration) {
       swStatus('offline cache active');
 
+      // Promptly check the server for a new service worker on every load so
+      // updates propagate faster than the browser's default ~24h staleness.
+      try {
+        registration.update();
+      } catch (e) {
+        // update() may not be supported; the onupdatefound path still covers reloads.
+      }
+
       // Detect a newly installed (updated) worker and keep it ready to activate.
       registration.onupdatefound = function () {
         var worker = registration.installing;
