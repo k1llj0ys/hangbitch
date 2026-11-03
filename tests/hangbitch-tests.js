@@ -24,7 +24,7 @@ const sw = read('app/service-worker.js');
 
 /* ---------------------------------------------------------------- helpers */
 
-const PART_ORDER = ['head', 'body', 'left-arm', 'right-arm', 'left-leg', 'right-leg', 'beer'];
+const PART_ORDER = ['head', 'body', 'arms', 'legs', 'beer'];
 
 function countParts(source) {
   return (source.match(/data-part="/g) || []).length;
@@ -78,10 +78,10 @@ const cases = [
     name: '3. the game is the seven-life Hangman it is meant to be',
     fn: async () => {
       const L = loadNamespace('app/game-logic.js', 'BHLogic');
-      eq(L.LIVES, 7, 'seven lives');
-      eq(L.STAGES.length, 8, 'gallows plus seven stages');
+      eq(L.LIVES, 5, 'five lives');
+      eq(L.STAGES.length, 6, 'gallows plus five stages');
       eq(L.STAGES[0], 'gallows', 'stage 0 is the bare gallows');
-      eq(L.STAGES[7], 'beer', 'stage 7 is the beer');
+      eq(L.STAGES[5], 'beer', 'stage 5 is the beer');
 
       const round = L.createRound({ word: 'CAT' });
       eq(L.guess(round, 'Z').result, 'incorrect', 'a wrong guess still costs a life');
@@ -109,7 +109,7 @@ const cases = [
         return s.replace(/data-part="|"/g, '');
       });
       eq(found.join(','), PART_ORDER.join(','), 'head, body, arms, legs, then the beer mug');
-      eq(countParts(indexHtml), 7, 'exactly seven parts — the gallows is not a life');
+      eq(countParts(indexHtml), 5, 'exactly five parts — the gallows is not a life');
 
       PART_ORDER.forEach(function (part) {
         includes(indexHtml, 'data-part="' + part + '"', 'the ' + part + ' exists');

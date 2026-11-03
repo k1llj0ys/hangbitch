@@ -16,14 +16,14 @@
 (function (root) {
   'use strict';
 
-  var LIVES = 7;
+  var LIVES = 5;
 
   /**
    * Illustration stages. Index 0 is the empty gallows (no life spent); each
-   * life spent reveals exactly one further stage. The 7th is the beer mug.
+   * life spent reveals exactly one further stage. The 5th is the beer mug.
    * `data-part` attributes in index.html must match these names exactly.
    */
-  var STAGES = ['gallows', 'head', 'body', 'left-arm', 'right-arm', 'left-leg', 'right-leg', 'beer'];
+  var STAGES = ['gallows', 'head', 'body', 'arms', 'legs', 'beer'];
 
   function LogicError(code, message) {
     this.name = 'LogicError';

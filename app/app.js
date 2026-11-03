@@ -42,14 +42,12 @@
   var K = window.BHKeys;
 
   var STAGE_CAPTIONS = {
-    0: 'Gallows only — seven mistakes and he gets a beer.',
-    1: 'Head. One life down.',
+    0: 'Gallows only — five mistakes and he gets a beer.',
+    1: 'Head with hair. One life down.',
     2: 'Body. Two lives down.',
-    3: 'Left arm. Three lives down.',
-    4: 'Right arm. Four lives down.',
-    5: 'Left leg and foot. Five lives down.',
-    6: 'Right leg and foot. Six lives down — one life left!',
-    7: 'He got his beer. Game over.'
+    3: 'Arms. Three lives down.',
+    4: 'Legs. Four lives down — one life left!',
+    5: 'He got his beer. Game over.'
   };
 
   var VIEW_TIPS = {
@@ -64,16 +62,16 @@
     '<p>Type a word or paste an encrypted payload, then guess letters one at a time.</p>' +
     '<ul>' +
       '<li>A correct guess reveals every occurrence and costs nothing.</li>' +
-      '<li>A wrong guess costs one life. You have seven.</li>' +
+      '<li>A wrong guess costs one life. You have five.</li>' +
       '<li>Spaces, punctuation and digits are shown automatically.</li>' +
       '<li>Guess with the on-screen keys or your physical keyboard.</li>' +
-      '<li>The seventh wrong guess adds the beer mug — game over.</li>' +
+      '<li>The fifth wrong guess adds the beer mug — game over.</li>' +
     '</ul>' +
     '<p>Below the picture you can doodle with the Pencil, rub it out with the Eraser, ' +
     'and pick a colour from the palette. Nothing you draw is saved.</p>';
 
   var ABOUT_TEXT =
-    '<p><strong>Hangbitch</strong> — a seven-life game of Hangman wearing a classic ' +
+    '<p><strong>Hangbitch</strong> — a five-life game of Hangman wearing a classic ' +
     'Microsoft Paint costume.</p>' +
     '<p>Everything runs in your browser. No accounts, no network requests, no analytics.</p>' +
     '<p>Words are sealed with RSA-OAEP and AES-GCM through the native Web Crypto API. ' +
@@ -94,7 +92,8 @@
     doodling: false,
     activeDoodle: null,
     gameOverTimer: null,    // pending game-over dialog timer
-    messageTimer: null      // pending message fade-out timer
+    messageTimer: null,     // pending message fade-out timer
+    winTimer: null          // delayed win bubble/dialog timer
   };
 
   // Service-worker update lifecycle state.
@@ -431,6 +430,11 @@
       clearTimeout(state.gameOverTimer);
       state.gameOverTimer = null;
     }
+    // Cancel any pending win timer
+    if (state.winTimer) {
+      clearTimeout(state.winTimer);
+      state.winTimer = null;
+    }
 
     state.round = null;
     renderBoard(null);
@@ -684,6 +688,11 @@
       clearTimeout(state.messageTimer);
       state.messageTimer = null;
     }
+    // Cancel any pending win timer.
+    if (state.winTimer) {
+      clearTimeout(state.winTimer);
+      state.winTimer = null;
+    }
 
     var secret = { word: state.round.word, hint: state.round.hint };
     startRound(secret);
@@ -715,7 +724,9 @@
 
     if (outcome.result === 'correct') {
       setMessage('', null);
-      showThoughtBubble('win', null, 'Nice!');
+      // The win bubble ("Nice ka brox!") is shown after a short delay in
+      // finishRound() once the word is fully revealed. Showing it here too
+      // would cause duplicate/conflicting triggers.
     } else {
       showThoughtBubble('loss', null, 'BOBO!');
       shakeStage();
@@ -742,17 +753,27 @@
     el['btn-hint'].disabled = !round.hint;
 
     if (result === 'won') {
+      // Cancel any stale win timer so repeated wins cannot stack triggers.
+      if (state.winTimer) {
+        clearTimeout(state.winTimer);
+        state.winTimer = null;
+      }
       setMessage('', null);
-      showThoughtBubble('win', null, 'Nice ka brox!');
       setState('Round won.');
       setTips('You solved it. Everyone drinks.');
-      openMessageDialog('Hangbitch — You win!', [
-        'Solved with ' + (round.lives - round.wrong) + ' of ' + round.lives + ' lives left.',
-        'The secret was: ' + round.word
-      ], [
-        { label: 'Restart round', onClick: restartRound },
-        { label: 'New game…', primary: true, onClick: openPlayView }
-      ]);
+      // Wait about 1 second before showing the win bubble and dialog, so the
+      // final revealed letter lands first and the result isn't duplicated.
+      state.winTimer = window.setTimeout(function () {
+        state.winTimer = null;
+        showThoughtBubble('win', null, 'Nice ka brox!');
+        openMessageDialog('Hangbitch — You win!', [
+          'Solved with ' + (round.lives - round.wrong) + ' of ' + round.lives + ' lives left.',
+          'The secret was: ' + round.word
+        ], [
+          { label: 'Restart round', onClick: restartRound },
+          { label: 'New game…', primary: true, onClick: openPlayView }
+        ]);
+      }, 1000);
     } else {
       // Cancel any pending game-over timer and message timer first.
       if (state.gameOverTimer) {
@@ -763,6 +784,10 @@
         clearTimeout(state.messageTimer);
         state.messageTimer = null;
       }
+      if (state.winTimer) {
+        clearTimeout(state.winTimer);
+        state.winTimer = null;
+      }
 
       setMessage('', null);
       showThoughtBubble('loss', L.answer(round), 'Mamatay tas imong ka-bugo brox!');
@@ -772,7 +797,7 @@
       // Set a 1.2 second delay before showing the game-over dialog
       state.gameOverTimer = window.setTimeout(function () {
         openMessageDialog('Hangbitch — Game over', [
-          'Seven wrong guesses. He got his beer.',
+          'Five wrong guesses. He got his beer.',
           'The secret was: ' + round.word
         ], [
           { label: 'Restart round', onClick: restartRound },
