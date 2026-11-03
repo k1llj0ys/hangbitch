@@ -42,12 +42,12 @@
   var K = window.BHKeys;
 
   var STAGE_CAPTIONS = {
-    0: 'Gallows only — five mistakes and he gets a beer.',
+    0: 'Gallows only — five mistakes and she gets a beer.',
     1: 'Head with hair. One life down.',
     2: 'Body. Two lives down.',
     3: 'Arms. Three lives down.',
     4: 'Legs. Four lives down — one life left!',
-    5: 'He got his beer. Game over.'
+    5: 'She got her beer. Game over.'
   };
 
   var VIEW_TIPS = {
