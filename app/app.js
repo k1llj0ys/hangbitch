@@ -797,7 +797,7 @@
       // Set a 1.2 second delay before showing the game-over dialog
       state.gameOverTimer = window.setTimeout(function () {
         openMessageDialog('Hangbitch — Game over', [
-          'Five wrong guesses. He got his beer.',
+          'Five wrong guesses. She got her beer.',
           'The secret was: ' + round.word
         ], [
           { label: 'Restart round', onClick: restartRound },
