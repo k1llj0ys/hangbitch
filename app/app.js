@@ -124,7 +124,7 @@
 
       // play
       'view-play', 'manual-word', 'manual-hint', 'btn-manual-start', 'manual-status',
-      'payload-input', 'btn-import', 'btn-clear-payload', 'decrypt-key-note',
+      'payload-input', 'btn-paste-start', 'btn-clear-payload', 'decrypt-key-note',
       'payload-meta', 'import-status', 'btn-home-from-play',
 
       // game
@@ -898,32 +898,33 @@
     showView('game');
   }
 
-  function handleImport() {
+  function handlePasteStart() {
     if (state.busy) {
       return;
     }
-    var text = el['payload-input'].value.trim();
     setStatus(el['import-status'], '', null);
     el['payload-meta'].textContent = '';
 
-    if (!text) {
-      setStatus(el['import-status'], 'Paste the payload someone sent you first.', 'error');
-      return;
-    }
+    navigator.clipboard.readText()
+      .then(function (text) {
+        text = text.trim();
+        if (!text) {
+          setStatus(el['import-status'], 'Nothing on the clipboard to paste.', 'error');
+          return;
+        }
 
-    try {
-      var meta = C.describePayload(text);
-      el['payload-meta'].textContent = 'Payload v' + (meta.version || '?') + ' (simple share format)';
-    } catch (metaErr) {
-      setStatus(el['import-status'], describeError(metaErr), 'error');
-      return;
-    }
+        try {
+          var meta = C.describePayload(text);
+          el['payload-meta'].textContent = 'Payload v' + (meta.version || '?') + ' (simple share format)';
+        } catch (metaErr) {
+          setStatus(el['import-status'], describeError(metaErr), 'error');
+          return;
+        }
 
-    busy(true);
-    C.decryptPayload(text, null, null)
+        busy(true);
+        return C.decryptPayload(text, null, null);
+      })
       .then(function (secret) {
-        // Clear the ciphertext box; the plaintext now lives only in the round.
-        el['payload-input'].value = '';
         startRound({ word: secret.word, hint: secret.hint });
         setStatus(el['import-status'], 'Decrypted locally. ' + (secret.hint ? 'A hint is available if you need it.' : 'No hint was provided.'), 'ok');
         showView('game');
@@ -1774,7 +1775,7 @@
       });
     });
 
-    el['btn-import'].addEventListener('click', handleImport);
+    el['btn-paste-start'].addEventListener('click', handlePasteStart);
     el['btn-clear-payload'].addEventListener('click', clearPayloadBox);
 
     // Game view
