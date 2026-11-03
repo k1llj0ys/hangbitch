@@ -130,7 +130,7 @@
       // game
       'view-game', 'hangman-svg', 'stage-caption', 'lives-display', 'lives-icons',
       'lives-text', 'word-display', 'message', 'letter-grid', 'doodles',
-      'thought-bubble-win', 'thought-bubble-loss', 'thought-bubble-answer',
+      'thought-bubble-win', 'thought-bubble-nice', 'thought-bubble-loss', 'thought-bubble-answer',
       'btn-hint', 'btn-restart', 'btn-new-word', 'hint-box', 'hint-text',
       'answer-box', 'answer-text',
 
@@ -481,7 +481,7 @@
       state.messageTimer = null;
     }
 
-    [el['thought-bubble-win'], el['thought-bubble-loss']].forEach(function (b) {
+    [el['thought-bubble-win'], el['thought-bubble-nice'], el['thought-bubble-loss']].forEach(function (b) {
       if (b) {
         b.classList.add('hidden');
         b.classList.remove('thought-bubble--fade-out');
@@ -493,7 +493,7 @@
     }
     var body = bubble.querySelector('.thought-bubble__body');
     if (body) {
-      body.textContent = customBody || (kind === 'win' ? 'Nice ka brox!' : 'Mamatay tas imong ka-bugo brox!');
+      body.textContent = customBody || (kind === 'win' ? 'Nice ka brox!' : kind === 'nice' ? 'Nice!' : 'Mamatay tas imong ka-bugo brox!');
     }
     if (kind === 'loss' && el['thought-bubble-answer']) {
       el['thought-bubble-answer'].textContent = customBody
@@ -522,7 +522,7 @@
   }
 
   function hideThoughtBubbles() {
-    [el['thought-bubble-win'], el['thought-bubble-loss']].forEach(function (b) {
+    [el['thought-bubble-win'], el['thought-bubble-nice'], el['thought-bubble-loss']].forEach(function (b) {
       if (b) {
         b.classList.add('hidden');
       }
@@ -724,9 +724,7 @@
 
     if (outcome.result === 'correct') {
       setMessage('', null);
-      // The win bubble ("Nice ka brox!") is shown after a short delay in
-      // finishRound() once the word is fully revealed. Showing it here too
-      // would cause duplicate/conflicting triggers.
+      showThoughtBubble('nice', null, 'Nice!');
     } else {
       showThoughtBubble('loss', null, 'BOBO!');
       shakeStage();

@@ -467,6 +467,11 @@ textarea[readonly] { background: #f4f4f4; }
   border-color: #a00000;
   color: #a00000;
 }
+.thought-bubble--nice {
+  background: #e6ffe6;
+  border-color: #005f00;
+  color: #005f00;
+}
 .thought-bubble__body { display: inline-block; }
 .thought-bubble__answer { font-weight: normal; font-size: 0.9em; opacity: 0.85; }
 
@@ -486,6 +491,7 @@ textarea[readonly] { background: #f4f4f4; }
   border: 1px solid var(--dark);
 }
 .thought-bubble--win .thought-bubble__dot { border-color: #005f00; }
+.thought-bubble--nice .thought-bubble__dot { border-color: #005f00; }
 .thought-bubble--loss .thought-bubble__dot { border-color: #a00000; }
 .thought-bubble__tail .thought-bubble__dot:nth-child(1) { width: 11px; height: 11px; }
 .thought-bubble__tail .thought-bubble__dot:nth-child(2) { width: 8px; height: 8px; }
