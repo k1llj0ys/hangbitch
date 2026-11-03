@@ -902,37 +902,72 @@
     if (state.busy) {
       return;
     }
-    setStatus(el['import-status'], '', null);
-    el['payload-meta'].textContent = '';
 
-    navigator.clipboard.readText()
+    setStatus(el["import-status"], "", null);
+    el["payload-meta"].textContent = "";
+
+    navigator.clipboard
+      .readText()
       .then(function (text) {
         text = text.trim();
+
         if (!text) {
-          setStatus(el['import-status'], 'Nothing on the clipboard to paste.', 'error');
-          return;
+          setStatus(el["import-status"], "Nothing copied to paste.", "error");
+          return { skipped: true };
         }
 
         try {
           var meta = C.describePayload(text);
-          el['payload-meta'].textContent = 'Payload v' + (meta.version || '?') + ' (simple share format)';
+          el["payload-meta"].textContent =
+            "Payload v" + (meta.version || "?") + " (simple share format)";
         } catch (metaErr) {
-          setStatus(el['import-status'], describeError(metaErr), 'error');
-          return;
+          setStatus(el["import-status"], describeError(metaErr), "error");
+          return { skipped: true };
         }
 
         busy(true);
         return C.decryptPayload(text, null, null);
       })
       .then(function (secret) {
+        if (secret && secret.skipped) {
+          return;
+        }
+
+        if (!secret) {
+          setStatus(
+            el["import-status"],
+            "Unable to decrypt payload. Check your key or copied content.",
+            "error"
+          );
+          return;
+        }
+
+        if (!secret.word) {
+          setStatus(
+            el["import-status"],
+            "Invalid payload. No word was found.",
+            "error"
+          );
+          return;
+        }
+
         startRound({ word: secret.word, hint: secret.hint });
-        setStatus(el['import-status'], 'Decrypted locally. ' + (secret.hint ? 'A hint is available if you need it.' : 'No hint was provided.'), 'ok');
-        showView('game');
+
+        setStatus(
+          el["import-status"],
+          "Decrypted locally. " +
+            (secret.hint
+              ? "A hint is available if you need it."
+              : "No hint was provided."),
+          "ok"
+        );
+
+        showView("game");
       })
       .catch(function (err) {
-        setStatus(el['import-status'], describeError(err), 'error');
+        setStatus(el["import-status"], describeError(err), "error");
       })
-      .then(function () {
+      .finally(function () {
         busy(false);
       });
   }
