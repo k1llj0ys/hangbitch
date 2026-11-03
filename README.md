@@ -1,6 +1,6 @@
 # Hangbitch
 
-A cheeky, seven-life Hangman game **and** a public-key encryptor — wearing a
+A cheeky, five-life Hangman game **and** a public-key encryptor — wearing a
 classic **Microsoft Paint / Windows XP** costume. Everything runs in the
 browser: no accounts, no backend, and no network requests during play.
 
@@ -18,7 +18,7 @@ the `app/` folder, and it never reaches outside this project.
 
 | Job | What it does |
 |---|---|
-| **Play a game** | Type a word yourself, **or** paste an encrypted word someone sent you. Seven lives, one beer. |
+| **Play a game** | Type a word yourself, **or** paste an encrypted word someone sent you. Five lives, one beer. |
 | **Generate a word** | Type a secret, encrypt it in your browser, and send the host the payload. The plaintext never leaves your device. |
 
 ```
@@ -48,7 +48,7 @@ hangbitch/
 │   ├── app.js                UI controller (Paint chrome + the five views)
 │   ├── crypto.js             the crypto core (hybrid AES-GCM + RSA-OAEP)
 │   ├── default-keys.js       the BUILT-IN key pair (zero-setup default)
-│   ├── game-logic.js         pure seven-life rules (no DOM)
+│   ├── game-logic.js         pure five-life rules (no DOM)
 │   ├── key-management.js     storage, clipboard and file helpers (hb.* keys)
 │   ├── manifest.json         PWA manifest ("Hangbitch")
 │   ├── service-worker.js     offline cache (same-origin files only)
@@ -113,9 +113,9 @@ node tools/serve.js 8777 app
   Correct guesses reveal every occurrence; a repeat costs nothing.
 - **Spaces, punctuation and digits are shown automatically** and never cost a
   life. Guessing **E** reveals **É** (Unicode NFC folding).
-- The illustration follows the **exact seven-life progression**:
+- The illustration follows the **exact five-life progression**:
   `gallows → head → body → left arm → right arm → left leg+foot → right leg+foot
-  → beer mug`. The **beer mug appears only after the seventh wrong guess** and ends
+  → beer mug`. The **beer mug appears only after the fifth wrong guess** and ends
   the round. The figure is drawn as crude hand-drawn strokes on a white canvas you
   can also scribble on.
 
@@ -149,8 +149,8 @@ node --experimental-global-webcrypto tests/hangbitch-tests.js
 ```
 
 It checks that the app is complete and self-contained (every file it needs is
-inside `app/`, with no parent-relative paths), that the seven-life rules, payload
-format and built-in key are intact, that the illustration has exactly the seven
+inside `app/`, with no parent-relative paths), that the five-life rules, payload
+format and built-in key are intact, that the illustration has exactly the five
 switchable parts (beer last), that every element lookup and every menu/tool
 action resolves, that the palette really sets the drawing colour, that the theme
 is all-local, that the offline cache and `hb.*` storage are its own, and that the
@@ -161,7 +161,7 @@ built-in key encrypts and decrypts a payload on its own.
 - Confirm it looks like classic Microsoft Paint.
 - Open each File / Edit / View / Help menu item; confirm it does something and closes.
 - Pick a colour, draw on the picture, then clear the doodles.
-- Watch the seven illustration stages appear in order, ending with the beer mug.
+- Watch the five illustration stages appear in order, ending with the beer mug.
 - Encrypt a word, then paste the payload back through **Play a game**.
 - Disconnect from the internet and finish a round.
 

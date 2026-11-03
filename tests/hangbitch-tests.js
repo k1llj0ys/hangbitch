@@ -75,7 +75,7 @@ const cases = [
     }
   },
   {
-    name: '3. the game is the seven-life Hangman it is meant to be',
+    name: '3. the game is the five-life Hangman it is meant to be',
     fn: async () => {
       const L = loadNamespace('app/game-logic.js', 'BHLogic');
       eq(L.LIVES, 5, 'five lives');
@@ -103,7 +103,7 @@ const cases = [
     }
   },
   {
-    name: '5. the illustration has exactly the seven switchable parts, beer last',
+    name: '5. the illustration has exactly the five switchable parts, beer last',
     fn: async () => {
       const found = (indexHtml.match(/data-part="([^"]+)"/g) || []).map(function (s) {
         return s.replace(/data-part="|"/g, '');
@@ -295,7 +295,7 @@ runAll('Hangbitch tests', cases).then(function (result) {
   console.log('  * open app/index.html and confirm it looks like classic Microsoft Paint');
   console.log('  * open each File / Edit / View / Help menu item and confirm it does something and closes');
   console.log('  * pick a colour, draw on the picture, then clear the doodles');
-  console.log('  * confirm the seven illustration stages appear in order and the beer mug is last');
+  console.log('  * confirm the five illustration stages appear in order and the beer mug is last');
   if (result.failures.length) {
     console.log('  (' + result.failures.length + ' automated checks failed — fix those first)');
   }

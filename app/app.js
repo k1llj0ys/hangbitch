@@ -4,7 +4,7 @@
  * One page, five views (toggled by the .hidden class), five jobs:
  *   home    — pick a job: "Play a game" or "Generate a word"
  *   play    — type a word yourself, or paste an encrypted payload
- *   game    — the seven-life board
+ *   game    — the five-life board
  *   encrypt — turn a secret word into a payload for the host
  *   keys    — see / change the key pair
  *

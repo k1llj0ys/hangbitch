@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hangbitch</title>
-<meta name="description" content="Hangbitch — seven-life Hangman and a public-key encryptor wearing a classic Microsoft Paint / Windows XP costume. Everything happens in your browser.">
+<title>Hangbitch</title>  
+<meta name="description" content="Hangbitch — five-life Hangman and a public-key encryptor wearing a classic Microsoft Paint / Windows XP costume. Everything happens in your browser.">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#0a246a">
 <meta name="referrer" content="no-referrer">
@@ -273,7 +273,7 @@
     <section class="view" id="view-home">
       <div class="paint-canvas">
         <h1 class="canvas-title">untitled &mdash; Hangbitch</h1>
-        <p class="canvas-text">Seven lives, one word &mdash; and a set of key tools, all wearing an old
+        <p class="canvas-text">Five lives, one word &mdash; and a set of key tools, all wearing an old
           drawing program as a costume. Pick a job below.</p>
 
         <div class="home-grid">
@@ -286,7 +286,7 @@
               </svg>
             </span>
             <span class="pick__title">Play a game</span>
-            <span class="pick__sub">Type a word yourself, or paste an encrypted word someone sent you. Seven lives, one beer.</span>
+            <span class="pick__sub">Type a word yourself, or paste an encrypted word someone sent you. Five lives, one beer.</span>
           </button>
 
           <button type="button" class="pick" id="btn-go-encrypt">
@@ -357,7 +357,7 @@
             <svg id="hangman-svg" class="canvas-svg" viewBox="0 0 320 330" role="img"
                  aria-labelledby="hangman-title hangman-desc" data-stage="0">
               <title id="hangman-title">Hangbitch illustration</title>
-              <desc id="hangman-desc">A rough hand-drawn gallows. One body part is scribbled in for each wrong guess; the seventh wrong guess adds a beer mug.</desc>
+              <desc id="hangman-desc">A rough hand-drawn gallows. One body part is scribbled in for each wrong guess; the fifth wrong guess adds a beer mug.</desc>
 
               <g class="gallows" aria-hidden="true">
                 <path class="ink" d="M8 305 L150 303"/>
@@ -427,12 +427,12 @@
             </div>
           </div>
 
-          <p class="caption" id="stage-caption">Gallows only &mdash; seven mistakes and he gets a beer.</p>
+          <p class="caption" id="stage-caption">Gallows only &mdash; five mistakes and he gets a beer.</p>
 
           <div class="lives" id="lives-display" role="status" aria-live="polite">
             <span class="label">Lives</span>
             <span class="lives__icons" id="lives-icons" aria-hidden="true"></span>
-            <span class="lives__text" id="lives-text">7 / 7</span>
+            <span class="lives__text" id="lives-text">5 / 5</span>
           </div>
         </div>
 
