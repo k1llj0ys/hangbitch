@@ -769,9 +769,9 @@
           'The secret was: ' + round.word
         ], [
           { label: 'Restart round', onClick: restartRound },
-          { label: 'New game…', primary: true, onClick: openPlayView }
+          { label: 'New game', primary: true, onClick: openPlayView }
         ]);
-      }, 200);
+      }, 1200);
     } else {
       // Cancel any pending game-over timer and message timer first.
       if (state.gameOverTimer) {
@@ -799,7 +799,7 @@
           'The secret was: ' + round.word
         ], [
           { label: 'Restart round', onClick: restartRound },
-          { label: 'New game…', primary: true, onClick: openPlayView }
+          { label: 'New game', primary: true, onClick: openPlayView }
         ]);
         state.gameOverTimer = null;
       }, 1200);
