@@ -93,7 +93,8 @@
     activeDoodle: null,
     gameOverTimer: null,    // pending game-over dialog timer
     messageTimer: null,     // pending message fade-out timer
-    winTimer: null          // delayed win bubble/dialog timer
+    winTimer: null,           // delayed win bubble timer
+    winDialogTimer: null      // delayed win message-dialog timer
   };
 
   // Service-worker update lifecycle state.
@@ -435,6 +436,11 @@
       clearTimeout(state.winTimer);
       state.winTimer = null;
     }
+    // Cancel any pending win dialog timer
+    if (state.winDialogTimer) {
+      clearTimeout(state.winDialogTimer);
+      state.winDialogTimer = null;
+    }
 
     state.round = null;
     renderBoard(null);
@@ -751,19 +757,26 @@
     el['btn-hint'].disabled = !round.hint;
 
     if (result === 'won') {
-      // Cancel any stale win timer so repeated wins cannot stack triggers.
+      // Cancel any stale win timers so repeated wins cannot stack triggers.
       if (state.winTimer) {
         clearTimeout(state.winTimer);
         state.winTimer = null;
       }
+      if (state.winDialogTimer) {
+        clearTimeout(state.winDialogTimer);
+        state.winDialogTimer = null;
+      }
       setMessage('', null);
       setState('Round won.');
       setTips('You solved it. Everyone drinks.');
-      // Wait about 1 second before showing the win bubble and dialog, so the
-      // final revealed letter lands first and the result isn't duplicated.
+      // Show the win thought bubble after 600ms, once the final revealed
+      // letter has landed, then the result dialog after 1200ms.
       state.winTimer = window.setTimeout(function () {
         state.winTimer = null;
         showThoughtBubble('win', null, 'Nice ka brox!');
+      }, 600);
+      state.winDialogTimer = window.setTimeout(function () {
+        state.winDialogTimer = null;
         openMessageDialog('Hangbitch — You win!', [
           'Solved with ' + (round.lives - round.wrong) + ' of ' + round.lives + ' lives left.',
           'The secret was: ' + round.word
@@ -785,6 +798,10 @@
       if (state.winTimer) {
         clearTimeout(state.winTimer);
         state.winTimer = null;
+      }
+      if (state.winDialogTimer) {
+        clearTimeout(state.winDialogTimer);
+        state.winDialogTimer = null;
       }
 
       setMessage('', null);
@@ -1867,6 +1884,15 @@
       if (state.gameOverTimer) {
         clearTimeout(state.gameOverTimer);
         state.gameOverTimer = null;
+      }
+      // Cancel any pending win timers
+      if (state.winTimer) {
+        clearTimeout(state.winTimer);
+        state.winTimer = null;
+      }
+      if (state.winDialogTimer) {
+        clearTimeout(state.winDialogTimer);
+        state.winDialogTimer = null;
       }
 
       showView('home');
