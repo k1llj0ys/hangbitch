@@ -8,15 +8,15 @@
  *   encrypt — turn a secret word into a payload for the host
  *   keys    — see / change the key pair
  *
- * What makes Hangbitch its own thing is the costume: a Windows XP / Microsoft
- * Paint chrome around the game —
- *   - a blue title bar with Minimize / Maximize / Close,
- *   - a File / Edit / View / Help menu bar,
- *   - a tool bar (Pencil, Eraser, Clear, New game, Restart, Hint),
- *   - a 28-swatch colour palette that sets the colour you draw with,
+ * What makes Hangbitch its own thing is the costume: a Windows 10-era
+ * Microsoft Paint chrome around the game —
+ *   - a modern title bar with Minimize / Maximize / Close,
+ *   - a File / Home / View ribbon,
+ *   - tool buttons (Pencil, Eraser, Clear, New game, Restart, Hint),
+ *   - a square color palette that sets the colour you draw with,
  *   - a freehand doodle layer over the illustration,
  *   - a status bar, and
- *   - old-Windows dialogs for menus, help and game results.
+ *   - modern dialogs for help and game results.
  *
  * Key handling:
  *   - a built-in key pair ships in default-keys.js, so both jobs work with no
@@ -68,11 +68,11 @@
       '<li>The fifth wrong guess adds the beer mug — game over.</li>' +
     '</ul>' +
     '<p>Below the picture you can doodle with the Pencil, rub it out with the Eraser, ' +
-    'and pick a colour from the palette. Nothing you draw is saved.</p>';
+    'and pick a color from the palette. Nothing you draw is saved.</p>';
 
   var ABOUT_TEXT =
-    '<p><strong>Hangbitch</strong> — a five-life game of Hangman wearing a classic ' +
-    'Microsoft Paint costume.</p>' +
+    '<p><strong>Hangbitch</strong> — a five-life game of Hangman with a modern ' +
+    'Microsoft Paint-style interface.</p>' +
     '<p>Everything runs in your browser. No accounts, no network requests, no analytics.</p>' +
     '<p>Words are sealed with RSA-OAEP and AES-GCM through the native Web Crypto API. ' +
     'The secret word and the hint live only in memory and are never written to storage.</p>' +
@@ -98,8 +98,10 @@
   };
 
   // Service-worker update lifecycle state.
-  var swUpdating = false;    // set while an update reload is in flight (prevents loops)
-  var updateWorker = null;   // waiting worker ready to be activated
+  var swUpdating = false;           // true while reload-from-update is in flight
+  var swReloadPending = false;      // set on controllerchange; reload once
+  var swUpdateApplied = false;      // prevents duplicate reloads per page load
+  var updateWorker = null;          // waiting worker ready to be activated
 
   var MENU_IDS = ['menu-file', 'menu-edit', 'menu-view', 'menu-help'];
 
@@ -1504,26 +1506,32 @@
       svg.classList.toggle('tool-pencil', state.tool === 'pencil');
       svg.classList.toggle('tool-eraser', state.tool === 'eraser');
     }
-    if (el['tool-pencil']) {
-      el['tool-pencil'].classList.toggle('is-active', state.tool === 'pencil');
-    }
-    if (el['tool-eraser']) {
-      el['tool-eraser'].classList.toggle('is-active', state.tool === 'eraser');
-    }
+    var toolBtns = document.querySelectorAll('[data-action="tool-pencil"], [data-action="tool-eraser"]');
+    Array.prototype.forEach.call(toolBtns, function (btn) {
+      var action = btn.getAttribute('data-action');
+      btn.classList.toggle('is-active', (state.tool === 'pencil' && action === 'tool-pencil') || (state.tool === 'eraser' && action === 'tool-eraser'));
+    });
     updateToolReadout();
   }
 
   function setColor(hex) {
     state.color = hex;
-    if (el['color-current']) {
-      el['color-current'].style.background = hex;
-    }
+    var wells = document.querySelectorAll('#color-current, .color-well--fg .color-well__inner');
+    Array.prototype.forEach.call(wells, function (node) {
+      if (node && node.style) {
+        node.style.background = hex;
+      }
+    });
     if (el['palette']) {
       var swatches = el['palette'].querySelectorAll('.swatch');
       Array.prototype.forEach.call(swatches, function (s) {
         s.classList.toggle('is-active', s.getAttribute('data-color') === hex);
       });
     }
+    var minis = document.querySelectorAll('.palette__swatch.mini');
+    Array.prototype.forEach.call(minis, function (s) {
+      s.classList.toggle('active', s.getAttribute('data-ribcolor') === hex);
+    });
     updateToolReadout();
   }
 
@@ -1675,15 +1683,33 @@
   }
 
   function activateUpdate() {
-    if (swUpdating || !updateWorker) {
+    if (swUpdating || swUpdateApplied || !updateWorker) {
       return;
     }
     swUpdating = true;
-    swStatus('update available — activating…');
-    // Ask the waiting worker to skip waiting and claim this page. When it takes
-    // control, a 'controllerchange' event fires and we reload once to run the
-    // fresh shell (latest HTML, CSS and JS) from the server.
-    updateWorker.postMessage({ type: 'SKIP_WAITING' });
+    swReloadPending = true;
+    swStatus('update available - activating...');
+    try {
+      updateWorker.postMessage({ type: 'SKIP_WAITING' });
+    } catch (e) {
+      swUpdating = false;
+      swReloadPending = false;
+    }
+  }
+
+  function handleWaitingWorker(worker, registration) {
+    if (!worker || swUpdateApplied) {
+      return;
+    }
+    updateWorker = worker;
+    swStatus('update available');
+    showUpdateBanner(true);
+    // Do not interrupt active gameplay; banner lets the user reload when ready.
+    if (!isGameActive()) {
+      activateUpdate();
+    } else if (registration && registration.waiting && registration.waiting !== worker) {
+      // no-op: keep latest waiting worker only
+    }
   }
 
   function registerServiceWorker() {
@@ -1703,53 +1729,51 @@
     navigator.serviceWorker.register('service-worker.js').then(function (registration) {
       swStatus('offline cache active');
 
-      // Promptly check the server for a new service worker on every load so
-      // updates propagate faster than the browser's default ~24h staleness.
-      try {
-        registration.update();
-      } catch (e) {
-        // update() may not be supported; the onupdatefound path still covers reloads.
+      // If a worker is already waiting (e.g. after refresh), handle it once.
+      if (registration.waiting && navigator.serviceWorker.controller) {
+        handleWaitingWorker(registration.waiting, registration);
       }
 
-      // Detect a newly installed (updated) worker and keep it ready to activate.
-      registration.onupdatefound = function () {
+      // Check for a fresh worker when the user refreshes/returns online.
+      try { registration.update(); } catch (e) {}
+      window.addEventListener('online', function () {
+        try { registration.update(); } catch (e) {}
+      }, { passive: true });
+
+      registration.addEventListener('updatefound', function () {
         var worker = registration.installing;
         if (!worker) {
           return;
         }
-        updateWorker = worker;
         worker.addEventListener('statechange', function () {
-          if (worker.state === 'installed') {
-            swStatus('update available');
-            showUpdateBanner(true);
-            // Activate promptly when it is safe (not mid-game); otherwise the
-            // user clicks Reload on the banner when they are ready.
-            if (!isGameActive()) {
-              activateUpdate();
-            }
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+            handleWaitingWorker(worker, registration);
           }
         });
-      };
-
-      // A new worker has taken control of this page: reload once to run the
-      // fresh shell (latest HTML, CSS and JS) from the server.
-      navigator.serviceWorker.addEventListener('controllerchange', function () {
-        if (swUpdating) {
-          swUpdating = false;
-          location.reload();
-        }
       });
 
-      // Banner controls.
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        // Reload once, and only when this page initiated an update.
+        if (!swReloadPending || swUpdateApplied) {
+          return;
+        }
+        swUpdateApplied = true;
+        swReloadPending = false;
+        swUpdating = false;
+        window.location.reload();
+      });
+
       var reloadBtn = document.getElementById('sw-update-reload');
       var dismissBtn = document.getElementById('sw-update-dismiss');
-      if (reloadBtn) {
+      if (reloadBtn && !reloadBtn._hbBound) {
+        reloadBtn._hbBound = true;
         reloadBtn.addEventListener('click', function () {
           showUpdateBanner(false);
           activateUpdate();
         });
       }
-      if (dismissBtn) {
+      if (dismissBtn && !dismissBtn._hbBound) {
+        dismissBtn._hbBound = true;
         dismissBtn.addEventListener('click', function () {
           showUpdateBanner(false);
         });
@@ -1758,16 +1782,11 @@
       swStatus('offline cache could not start (app still works)');
     });
   }
-
-  /* ------------------------------------------------------------------ *
-   * Boot
-   * ------------------------------------------------------------------ */
-
   function showEnvironmentWarning() {
     el['env-warning'].classList.remove('hidden');
     el['env-warning-text'].textContent =
       'Web Crypto is only available on https:// or http://localhost. ' +
-      'The key tools are disabled here, but you can still play: choose “Play a game”, type a word and press Start game. ' +
+      "The key tools are disabled here, but you can still play: choose \"Play a game\", type a word and press Start game. " +
       'To encrypt or unlock payloads, run start-game.bat instead of opening index.html directly, then reload.';
   }
 
@@ -1849,19 +1868,21 @@
     el['btn-download-public'].addEventListener('click', handleExportPublic);
     el['gen-pass'].addEventListener('input', updatePassphraseHint);
 
-    // Ribbon tabs
-    var ribbonTabs = el['win'].querySelectorAll('.ribbon__tab');
+    var ribbonTabs = el['win'].querySelectorAll('.ribbon__tab[data-tab]');
     Array.prototype.forEach.call(ribbonTabs, function (tab) {
       tab.addEventListener('click', function () {
         var targetTab = tab.getAttribute('data-tab');
         Array.prototype.forEach.call(ribbonTabs, function (t) {
-          t.classList.toggle('is-active', t === tab);
+          var active = t === tab;
+          t.classList.toggle('is-active', active);
+          t.setAttribute('aria-selected', active ? 'true' : 'false');
         });
         ['file', 'home', 'view'].forEach(function (name) {
           var panel = el['win'].querySelector('#ribbon-' + name);
           if (panel) {
-            panel.classList.toggle('is-active', name === targetTab);
-            panel.classList.toggle('hidden', name !== targetTab);
+            var on = name === targetTab;
+            panel.classList.toggle('is-active', on);
+            panel.classList.toggle('hidden', !on);
           }
         });
         setTips(targetTab.charAt(0).toUpperCase() + targetTab.slice(1) + ' tab.');
@@ -1896,7 +1917,7 @@
       }
 
       showView('home');
-      setState('Document closed — back to Home.');
+      setState('Document closed - back to Home.');
     });
 
     // Menus, tool bar and dialogs share one delegated click handler.
@@ -1908,23 +1929,25 @@
       }
     });
 
-    // Colour palette
-    el['palette'].addEventListener('click', function (event) {
-      var target = event.target;
-      if (!target || !target.closest) {
-        return;
-      }
-      var swatch = target.closest('[data-color]');
-      if (!swatch) {
-        return;
-      }
-      var hex = swatch.getAttribute('data-color');
-      var title = swatch.getAttribute('title') || '';
-      var name = title.split(' ').slice(0, -1).join(' ') || hex;
-      setColor(hex);
-      selectTool('pencil');
-      setTips(name + ' selected — drawing colour is now ' + hex + '.');
-    });
+    // Colour palette (compat layer)
+    if (el['palette']) {
+      el['palette'].addEventListener('click', function (event) {
+        var target = event.target;
+        if (!target || !target.closest) {
+          return;
+        }
+        var swatch = target.closest('[data-color]');
+        if (!swatch) {
+          return;
+        }
+        var hex = swatch.getAttribute('data-color');
+        var title = swatch.getAttribute('title') || '';
+        var name = title.split(' ').slice(0, -1).join(' ') || hex;
+        setColor(hex);
+        selectTool('pencil');
+        setTips(name + ' selected — drawing color is now ' + hex + '.');
+      });
+    }
 
     // Mini ribbon palette swatches
     document.addEventListener('click', function (event) {
@@ -1932,17 +1955,13 @@
       if (!target || !target.closest) {
         return;
       }
-      var swatch = target.closest('.palette__swatch.mini');
+      var swatch = target.closest('.palette__swatch.mini[data-ribcolor]');
       if (!swatch) {
         return;
       }
       var hex = swatch.getAttribute('data-ribcolor');
       setColor(hex);
       selectTool('pencil');
-      var wells = document.querySelectorAll('.palette__swatch.mini');
-      Array.prototype.forEach.call(wells, function (w) {
-        w.classList.toggle('active', w === swatch);
-      });
       setTips('Colour set to ' + hex + '.');
     }, true);
 

@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hangbitch</title>  
-<meta name="description" content="Hangbitch — five-life Hangman and a public-key encryptor wearing a classic Microsoft Paint / Windows XP costume. Everything happens in your browser.">
+<title>Untitled - Hangbitch</title>
+<meta name="description" content="Hangbitch � five-life Hangman and a public-key encryptor with a modern Windows 11 Paint look. Everything happens in your browser.">
 <meta name="color-scheme" content="light">
-<meta name="theme-color" content="#0a246a">
+<meta name="theme-color" content="#f9f9f9">
 <meta name="referrer" content="no-referrer">
 <link rel="stylesheet" href="paint.css">
 <link rel="manifest" href="manifest.json">
@@ -15,40 +15,35 @@
 <style>
   #sw-update {
     position: fixed;
-    bottom: 10px;
+    bottom: 12px;
     left: 50%;
     transform: translateX(-50%);
-    background: #d4d0c8;
-    border: 1px solid #404040;
-    color: #0a246a;
-    padding: 6px 10px;
-    font-size: 12px;
+    background: #ffffff;
+    border: 1px solid #c6c6c6;
+    color: #1f1f1f;
+    padding: 8px 12px;
+    font: 12px "Segoe UI", Tahoma, sans-serif;
     z-index: 1000;
-    border-radius: 4px;
-    box-shadow: 2px 2px 0 #404040;
+    box-shadow: 0 2px 8px rgba(0,0,0,.14);
     line-height: 1.4;
   }
-  #sw-update.hidden {
-    display: none;
-  }
+  #sw-update.hidden { display: none; }
   #sw-update button {
-    background: #0a246a;
+    background: #0078d4;
     color: #ffffff;
-    border: none;
-    padding: 2px 8px;
-    font-size: 12px;
+    border: 1px solid #0078d4;
+    padding: 3px 10px;
+    font: 12px "Segoe UI", Tahoma, sans-serif;
     cursor: pointer;
-    margin-left: 6px;
-    border-radius: 2px;
+    margin-left: 8px;
   }
+  #sw-update button:hover { background: #106ebe; }
   #sw-update-dismiss {
-    background: transparent;
-    color: #0a246a;
-    border: 1px solid #0a246a;
-    padding: 1px 6px;
+    background: #f3f3f3;
+    color: #1f1f1f;
+    border: 1px solid #8a8a8a;
+    padding: 2px 8px;
     margin-left: 4px;
-    cursor: pointer;
-    border-radius: 2px;
   }
 </style>
 </head>
@@ -63,569 +58,332 @@
 </div>
 
 <div class="win" id="win">
-
-  <!-- ===================== TITLE BAR ===================== -->
-  <div class="titlebar">
-    <span class="titlebar__icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24" width="16" height="16" role="presentation">
-        <rect x="2" y="3" width="20" height="18" fill="#ffffff" stroke="#404040" stroke-width="1.5"/>
-        <rect x="4" y="3" width="16" height="3" fill="#0a246a"/>
-        <path d="M7 15 L12 8 L17 15" fill="none" stroke="#c00000" stroke-width="1.6"/>
-        <rect x="9" y="15" width="6" height="4" fill="#f2c14e" stroke="#404040" stroke-width="1"/>
-      </svg>
-    </span>
-    <span class="titlebar__title">Hangbitch</span>
-    <span class="titlebar__controls">
-      <button type="button" class="tbtn-ctl" id="titlebar-min" title="Minimize (rolls this window up)"><span aria-hidden="true">_</span><span class="sr-only">Minimize</span></button>
-      <button type="button" class="tbtn-ctl" id="titlebar-max" title="Maximize (fills the browser window)"><span aria-hidden="true">&#9744;</span><span class="sr-only">Maximize</span></button>
-      <button type="button" class="tbtn-ctl tbtn-ctl--close" id="titlebar-close" title="Close this document (back to Home)"><span aria-hidden="true">&#10005;</span><span class="sr-only">Close</span></button>
-    </span>
-  </div>
+  <header class="titlebar" aria-label="Window title bar">
+    <div class="titlebar__left">
+      <span class="titlebar__icon" aria-hidden="true">
+        <svg viewBox="0 0 16 16" width="18" height="18" role="presentation">
+          <rect x="1" y="1.5" width="14" height="11.5" rx="2" fill="#fff" stroke="#8a8a8a"/>
+          <path d="M1.5 4.5h13" stroke="#d9d9d9"/>
+          <path d="M3.5 11l3.2-3.6 2.3 2.6 1.8-1.8 2.7 2.8" fill="none" stroke="#3a9d23" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="5" cy="7" r="1" fill="#4cc2ff"/>
+        </svg>
+      </span>
+      <span class="titlebar__title"><span id="doc-title">Untitled</span> - Paint</span>
+      <span class="chip" id="key-chip" title="Key status">Loading key&hellip;</span>
+    </div>
+    <div class="titlebar__controls" aria-label="Window controls">
+      <button type="button" class="tbtn-ctl" id="titlebar-min" title="Minimize"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M1 6h10" stroke="currentColor" stroke-width="1"/></svg><span class="sr-only">Minimize</span></button>
+      <button type="button" class="tbtn-ctl" id="titlebar-max" title="Maximize"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><rect x="1.5" y="1.5" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1"/></svg><span class="sr-only">Maximize</span></button>
+      <button type="button" class="tbtn-ctl tbtn-ctl--close" id="titlebar-close" title="Close"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2 2l8 8M10 2L2 10" stroke="currentColor" stroke-width="1"/></svg><span class="sr-only">Close</span></button>
+    </div>
+  </header>
 
   <!-- ===================== RIBBON ===================== -->
-  <div class="ribbon">
+  <div class="ribbon" role="tablist" aria-label="Ribbon tabs">
     <div class="ribbon__tabs">
-      <button type="button" class="ribbon__tab" data-tab="file">File</button>
-      <button type="button" class="ribbon__tab is-active" data-tab="home">Home</button>
-      <button type="button" class="ribbon__tab" data-tab="view">View</button>
+      <button type="button" class="ribbon__tab ribbon__tab--file" data-tab="file" role="tab" aria-selected="false">File</button>
+      <button type="button" class="ribbon__tab is-active" data-tab="home" role="tab" aria-selected="true">Home</button>
+      <button type="button" class="ribbon__tab" data-tab="view" role="tab" aria-selected="false">View</button>
+      <span class="ribbon__tab-spacer"></span>
+      <button type="button" class="ribbon__tab-help" data-action="how-to-play" title="Help">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor"/><path d="M6.2 6.2a1.8 1.8 0 1 1 2.6 1.6c-.6.3-.8.6-.8 1.3" fill="none" stroke="currentColor" stroke-linecap="round"/><circle cx="8" cy="11.3" r=".7" fill="currentColor"/></svg>
+      </button>
     </div>
 
-    <!-- File tab panel -->
-    <div class="ribbon__panel hidden" id="ribbon-file">
-      <div class="ribbon__group">
-        <div class="ribbon__group__label">File</div>
-        <button type="button" class="tbtn" id="tool-new" data-action="new-game" title="New game (opens the Play screen)">
-          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 2 h7 l2 2 v10 h-9 z" fill="#ffffff" stroke="#404040"/><path d="M11 2 v2 h2" fill="none" stroke="#404040"/></svg>
-          <span class="sr-only">New</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Home tab panel -->
-    <div class="ribbon__panel is-active" id="ribbon-home">
-      <!-- Clipboard group -->
-      <div class="ribbon__group">
-        <div class="ribbon__group__label">Clipboard</div>
-        <button type="button" class="tbtn" id="tool-new" data-action="new-game" title="New game (opens the Play screen)">
-          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 2 h7 l2 2 v10 h-9 z" fill="#ffffff" stroke="#404040"/><path d="M11 2 v2 h2" fill="none" stroke="#404040"/></svg>
-          <span class="sr-only">New</span>
-        </button>
-        <button type="button" class="tbtn" id="tool-restart" data-action="restart-round" title="Restart round (same secret, fresh lives)">
-          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M13 8 a5 5 0 1 1 -1.6 -3.7" fill="none" stroke="#404040" stroke-width="1.6"/><path d="M12 1 L14.6 5 L9.4 5 z" fill="#404040"/></svg>
-          <span class="sr-only">Restart</span>
-        </button>
-      </div>
-
-      <!-- Tools group -->
-      <div class="ribbon__group">
-        <div class="ribbon__group__label">Tools</div>
-        <button type="button" class="tbtn" id="tool-pencil" data-action="tool-pencil" title="Pencil — draw on the canvas with the selected colour">
-          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M12 1 L15 4 L5 14 L1 15 L2 11 z" fill="#d4d0c8" stroke="#404040"/><path d="M11 2 L14 5" stroke="#808080" fill="none"/></svg>
-          <span class="sr-only">Pencil</span>
-        </button>
-        <button type="button" class="tbtn" id="tool-eraser" data-action="tool-eraser" title="Eraser — rub out the strokes you drew">
-          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 12 L9 4 L14 8 L8 14 z" fill="#ffd7c8" stroke="#404040"/><path d="M1 15 L15 15" stroke="#404040"/></svg>
-          <span class="sr-only">Eraser</span>
-        </button>
-        <button type="button" class="tbtn" id="tool-clear" data-action="clear-doodles" title="Clear the canvas doodles (the gallows and the figure stay)">
-          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 4 L10 4 L10 13 L3 13 z" fill="#ffffff" stroke="#404040"/><path d="M10 7 L14 7 L14 13 L10 13" fill="#c0c0c0" stroke="#404040"/><path d="M12 2 L14 3 L11 6 L9 5 z" fill="#f2c14e" stroke="#404040"/></svg>
-          <span class="sr-only">Clear</span>
-        </button>
-      </div>
-
-      <!-- Game group -->
-      <div class="ribbon__group">
-        <div class="ribbon__group__label">Game</div>
-        <button type="button" class="tbtn" id="tool-hint" data-action="toggle-hint" title="Show the hint for this round">
-          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="6" r="4" fill="#ffff80" stroke="#404040"/><path d="M6 11 h4 M6.6 13 h2.8" stroke="#404040"/></svg>
-          <span class="sr-only">Hint</span>
-        </button>
-      </div>
-
-      <span class="toolbar__spacer" style="display:inline-flex;flex:1;"></span>
-      <span class="toolbar__readout" id="tool-readout">Pencil · #000000</span>
-
-      <!-- Colors group (always visible, like Paint's colors section) -->
-      <div class="ribbon__colors">
-        <div class="ribbon__group">
-          <!-- <div class="ribbon__group__label">Colors</div> -->
-          <div class="palette__mini">
-            <span class="palette__swatch mini active" id="color-mini-1" data-ribcolor="#000000" style="background:#000000"></span>
-            <span class="palette__swatch mini" id="color-mini-2" data-ribcolor="#ffffff" style="background:#ffffff"></span>
-            <span class="palette__swatch mini" id="color-mini-3" data-ribcolor="#808080" style="background:#808080"></span>
-            <span class="palette__swatch mini" id="color-mini-4" data-ribcolor="#ff0000" style="background:#ff0000"></span>
-            <span class="palette__swatch mini" id="color-mini-5" data-ribcolor="#00ff00" style="background:#00ff00"></span>
-            <span class="palette__swatch mini" id="color-mini-6" data-ribcolor="#0000ff" style="background:#0000ff"></span>
-            <span class="palette__swatch mini" id="color-mini-7" data-ribcolor="#ffff00" style="background:#ffff00"></span>
-            <span class="palette__swatch mini" id="color-mini-8" data-ribcolor="#00ffff" style="background:#00ffff"></span>
-            <span class="palette__swatch mini" id="color-mini-9" data-ribcolor="#ff00ff" style="background:#ff00ff"></span>
-            <span class="palette__swatch mini" id="color-mini-10" data-ribcolor="#800000" style="background:#800000"></span>
-            <span class="palette__swatch mini" id="color-mini-11" data-ribcolor="#008000" style="background:#008000"></span>
-            <span class="palette__swatch mini" id="color-mini-12" data-ribcolor="#000080" style="background:#000080"></span>
-          </div>
-          <div class="palette__wells">
-            <div class="palette__well" id="color-current" style="background:#000000"></div>
-            <div class="palette__well palette__well--secondary" style="background:#ffffff"></div>
-          </div>
-          <button type="button" class="tbtn" id="btn-edit-colors" title="Edit colors" style="width:auto;height:auto;padding:2px 6px;font-size:11px;">Edit colors</button>
+    <div class="ribbon__panel hidden" id="ribbon-file" role="tabpanel">
+      <div class="file-backstage">
+        <div class="file-backstage__list">
+          <button type="button" class="file-item" data-action="new-game">New</button>
+          <button type="button" class="file-item" data-action="import-word">Open encrypted word&hellip;</button>
+          <button type="button" class="file-item" data-action="restart-round">Restart round</button>
+          <button type="button" class="file-item" data-action="back-home">Home</button>
+          <div class="file-sep"></div>
+          <button type="button" class="file-item" id="btn-open-keys-file" onclick="document.getElementById('btn-open-keys').click()">Key settings</button>
+          <button type="button" class="file-item" data-action="about">About</button>
+        </div>
+        <div class="file-backstage__info">
+          <h2>Hangbitch</h2>
+          <p>Five-life Hangman and a public-key encryptor in a Paint costume. Everything runs locally in your browser.</p>
         </div>
       </div>
     </div>
 
-    <!-- View tab panel -->
-    <div class="ribbon__panel hidden" id="ribbon-view">
+    <div class="ribbon__panel is-active" id="ribbon-home" role="tabpanel">
       <div class="ribbon__group">
-        <div class="ribbon__group__label">View</div>
-        <button type="button" class="tbtn" data-action="toggle-lives" title="Show or hide the life counter">
-          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 1 L1 15 L15 15 z" fill="none" stroke="#404040"/><path d="M8 6 L8 11" stroke="#404040" stroke-width="1.6"/></svg>
-          <span class="sr-only">Lives</span>
+        <span class="ribbon__group__label">Image</span>
+        <button type="button" class="rbtn rbtn--large" id="tool-new" data-action="new-game" title="New game">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="4" y="3.5" width="16" height="17" rx="2" fill="#fff" stroke="#5f6368"/><path d="M8 12h8M12 8v8" stroke="#2563eb" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <span>New</span>
         </button>
-        <button type="button" class="tbtn" data-action="clear-doodles" title="Clear canvas doodles">
-          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 4 L10 4 L10 13 L3 13 z" fill="#ffffff" stroke="#404040"/><path d="M10 7 L14 7 L14 13 L10 13" fill="#c0c0c0" stroke="#404040"/><path d="M12 2 L14 3 L11 6 L9 5 z" fill="#f2c14e" stroke="#404040"/></svg>
-          <span class="sr-only">Clear</span>
+        <button type="button" class="rbtn" id="tool-restart" data-action="restart-round" title="Restart round">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.4-3.5" fill="none" stroke="#444" stroke-width="1.3"/><path d="M12 1.5v3.5H8.5" fill="none" stroke="#444" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <span>Restart</span>
         </button>
       </div>
-    </div>
 
-  <!-- ===================== MENU BAR (kept for app.js compatibility, styled as ribbon tabs) ===================== -->
-  <nav class="menubar" id="menubar" aria-label="Main menu" style="display:none;">
-    <div class="menu" id="menu-file">
-      <button type="button" class="menu__btn" aria-haspopup="true" aria-expanded="false">File</button>
-      <div class="menu__list" role="menu">
-        <button type="button" class="menu__item" role="menuitem" data-action="new-game">New Game</button>
-        <button type="button" class="menu__item" role="menuitem" data-action="restart-round">Restart Round</button>
-        <button type="button" class="menu__item" role="menuitem" data-action="back-home">Back to Home</button>
-        <div class="menu__sep" role="separator"></div>
-        <button type="button" class="menu__item" role="menuitem" data-action="import-word">Import Encrypted Word&hellip;</button>
+      <div class="ribbon__group">
+        <span class="ribbon__group__label">Tools</span>
+        <div class="ribbon__grid">
+          <button type="button" class="tbtn" id="tool-pencil" data-action="tool-pencil" title="Pencil">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M11.5 1.5l3 3L5 14l-3.5.5L2 11z" fill="#f6d365" stroke="#444"/><path d="M10 3l3 3" stroke="#444"/></svg>
+          </button>
+          <button type="button" class="tbtn" id="tool-eraser" data-action="tool-eraser" title="Eraser">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 11.5L9.5 4l4.5 4-6 6H3z" fill="#ffd6e7" stroke="#444"/><path d="M7 6.5l4.5 4.5" stroke="#444"/><path d="M2 14h12" stroke="#444"/></svg>
+          </button>
+          <button type="button" class="tbtn" id="tool-clear" data-action="clear-doodles" title="Clear canvas doodles">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><rect x="2.5" y="3" width="11" height="10" rx="1" fill="#fff" stroke="#444"/><path d="M5 5l6 6M11 5l-6 6" stroke="#c42b1c" stroke-width="1.3"/></svg>
+          </button>
+          <button type="button" class="tbtn" id="tool-hint" data-action="toggle-hint" title="Show hint">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="6" r="3.5" fill="#fff4ce" stroke="#444"/><path d="M6.5 10.5h3M7 12.5h2" stroke="#444"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="ribbon__group">
+        <span class="ribbon__group__label">Brushes</span>
+        <div class="ribbon__brushes" aria-hidden="true">
+          <span class="brush-swatch is-selected" title="Brush"></span>
+          <span class="brush-swatch brush-swatch--thin"></span>
+          <span class="brush-swatch brush-swatch--marker"></span>
+        </div>
+      </div>
+
+      <div class="ribbon__group">
+        <span class="ribbon__group__label">Shapes</span>
+        <div class="shapes-placeholder" aria-hidden="true">
+          <span class="shape-box"></span><span class="shape-box shape-box--round"></span><span class="shape-box shape-box--line"></span><span class="shape-box shape-box--poly"></span>
+        </div>
+      </div>
+
+      <div class="ribbon__group">
+        <span class="ribbon__group__label">Size</span>
+        <div class="size-picker" aria-hidden="true">
+          <span class="size-line" style="height:1px"></span>
+          <span class="size-line is-selected" style="height:3px"></span>
+          <span class="size-line" style="height:5px"></span>
+        </div>
+      </div>
+
+      <div class="ribbon__group ribbon__group--colors">
+        <div class="color-picker">
+          <div class="color-wells" aria-label="Selected colors">
+            <button type="button" class="color-well color-well--fg active" id="fg-well" title="Color 1"><span id="color-current" class="color-well__inner" style="background:#000000"></span><span class="color-well__label">Color<br>1</span></button>
+            <button type="button" class="color-well color-well--bg" title="Color 2"><span id="bg-color-current" class="color-well__inner" style="background:#ffffff"></span><span class="color-well__label">Color<br>2</span></button>
+          </div>
+          <div class="ribbon__colors">
+            <div class="palette__mini" id="ribbon-palette-mini" aria-label="Colors">
+              <button type="button" class="palette__swatch mini active" data-ribcolor="#000000" style="background:#000000" title="Black"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#7f7f7f" style="background:#7f7f7f" title="Gray"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#880015" style="background:#880015" title="Dark red"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#ed1c24" style="background:#ed1c24" title="Red"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#ff7f27" style="background:#ff7f27" title="Orange"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#fff200" style="background:#fff200" title="Yellow"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#22b14c" style="background:#22b14c" title="Green"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#00a2e8" style="background:#00a2e8" title="Turquoise"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#3f48cc" style="background:#3f48cc" title="Indigo"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#a349a4" style="background:#a349a4" title="Purple"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#ffffff" style="background:#ffffff" title="White"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#c3c3c3" style="background:#c3c3c3" title="Light gray"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#b97a57" style="background:#b97a57" title="Brown"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#ffaec9" style="background:#ffaec9" title="Rose"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#ffc90e" style="background:#ffc90e" title="Gold"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#efe4b0" style="background:#efe4b0" title="Light yellow"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#b5e61d" style="background:#b5e61d" title="Lime"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#99d9ea" style="background:#99d9ea" title="Light turquoise"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#7092be" style="background:#7092be" title="Blue-gray"></button>
+              <button type="button" class="palette__swatch mini" data-ribcolor="#c8bfe7" style="background:#c8bfe7" title="Lavender"></button>
+            </div>
+          </div>
+        </div>
+        <span class="ribbon__group__label ribbon__group__label--bottom">Colors</span>
       </div>
     </div>
 
-    <div class="menu" id="menu-edit">
-      <button type="button" class="menu__btn" aria-haspopup="true" aria-expanded="false">Edit</button>
-      <div class="menu__list" role="menu">
-        <button type="button" class="menu__item" role="menuitem" data-action="clear-word">Clear Word Box</button>
-        <button type="button" class="menu__item" role="menuitem" data-action="clear-payload">Clear Payload Box</button>
-        <div class="menu__sep" role="separator"></div>
-        <button type="button" class="menu__item" role="menuitem" data-action="reset-round">Reset Current Round</button>
+    <div class="ribbon__panel hidden" id="ribbon-view" role="tabpanel">
+      <div class="ribbon__group">
+        <span class="ribbon__group__label">Zoom</span>
+        <div class="ribbon__grid ribbon__grid--view">
+          <button type="button" class="tbtn" data-action="toggle-lives" title="Show/hide lives">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1" fill="none" stroke="#444"/><path d="M5 8h6M8 5v6" stroke="#0078d4"/></svg>
+          </button>
+          <button type="button" class="tbtn" data-action="clear-doodles" title="Clear doodles">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><rect x="2.5" y="3" width="11" height="10" fill="#fff" stroke="#444"/><path d="M5 5l6 6M11 5l-6 6" stroke="#d13438" stroke-width="1.4"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="ribbon__group">
+        <span class="ribbon__group__label">Show or hide</span>
+        <label class="ribbon-check"><input type="checkbox" checked disabled> Status bar</label>
+      </div>
+      <div class="ribbon__group">
+        <span class="ribbon__group__label">Display</span>
+        <div class="ribbon__meta"><span class="toolbar__readout" id="tool-readout">Pencil � #000000</span></div>
       </div>
     </div>
 
-    <div class="menu" id="menu-view">
-      <button type="button" class="menu__btn" aria-haspopup="true" aria-expanded="false">View</button>
-      <div class="menu__list" role="menu">
-        <button type="button" class="menu__item" role="menuitem" data-action="toggle-hint">Show Hint</button>
-        <button type="button" class="menu__item" role="menuitem" data-action="toggle-lives">Hide Lives</button>
-        <div class="menu__sep" role="separator"></div>
-        <button type="button" class="menu__item" role="menuitem" data-action="clear-doodles">Clear Canvas Doodles</button>
-      </div>
-    </div>
-
-    <div class="menu" id="menu-help">
-      <button type="button" class="menu__btn" aria-haspopup="true" aria-expanded="false">Help</button>
-      <div class="menu__list" role="menu">
-        <button type="button" class="menu__item" role="menuitem" data-action="how-to-play">How to Play</button>
-        <button type="button" class="menu__item" role="menuitem" data-action="about">About Hangbitch</button>
-      </div>
-    </div>
-
-    <span class="menubar__spacer"></span>
-    <span class="chip" id="key-chip">Loading key&hellip;</span>
-  </nav>
-
-  <!-- ===================== TOOLBAR (kept for app.js compatibility) ===================== -->
-  <div class="toolbar" role="toolbar" aria-label="Tools" style="display:none;">
-    <button type="button" class="tbtn" id="tool-pencil" data-action="tool-pencil" title="Pencil — draw on the canvas with the selected colour">
-      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M12 1 L15 4 L5 14 L1 15 L2 11 z" fill="#d4d0c8" stroke="#404040"/><path d="M11 2 L14 5" stroke="#808080" fill="none"/></svg>
-      <span class="sr-only">Pencil</span>
-    </button>
-    <button type="button" class="tbtn" id="tool-eraser" data-action="tool-eraser" title="Eraser — rub out the strokes you drew">
-      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 12 L9 4 L14 8 L8 14 z" fill="#ffd7c8" stroke="#404040"/><path d="M1 15 L15 15" stroke="#404040"/></svg>
-      <span class="sr-only">Eraser</span>
-    </button>
-    <button type="button" class="tbtn" id="tool-clear" data-action="clear-doodles" title="Clear the canvas doodles (the gallows and the figure stay)">
-      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 4 L10 4 L10 13 L3 13 z" fill="#ffffff" stroke="#404040"/><path d="M10 7 L14 7 L14 13 L10 13" fill="#c0c0c0" stroke="#404040"/><path d="M12 2 L14 3 L11 6 L9 5 z" fill="#f2c14e" stroke="#404040"/></svg>
-      <span class="sr-only">Clear doodles</span>
-    </button>
-
-    <span class="toolbar__sep" role="separator"></span>
-
-    <button type="button" class="tbtn" id="tool-new" data-action="new-game" title="New game (opens the Play screen)">
-      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 2 h7 l2 2 v10 h-9 z" fill="#ffffff" stroke="#404040"/><path d="M11 2 v2 h2" fill="none" stroke="#404040"/></svg>
-      <span class="sr-only">New game</span>
-    </button>
-    <button type="button" class="tbtn" id="tool-restart" data-action="restart-round" title="Restart round (same secret, fresh lives)">
-      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M13 8 a5 5 0 1 1 -1.6 -3.7" fill="none" stroke="#404040" stroke-width="1.6"/><path d="M12 1 L14.6 5 L9.4 5 z" fill="#404040"/></svg>
-      <span class="sr-only">Restart round</span>
-    </button>
-    <button type="button" class="tbtn" id="tool-hint" data-action="toggle-hint" title="Show the hint for this round">
-      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="6" r="4" fill="#ffff80" stroke="#404040"/><path d="M6 11 h4 M6.6 13 h2.8" stroke="#404040"/></svg>
-      <span class="sr-only">Hint</span>
-    </button>
-
-    <span class="toolbar__spacer"></span>
-    <span class="toolbar__readout" id="tool-readout">Pencil</span>
+    <!-- Compatibility: menubar/toolbar/palette classes kept for tests/app hooks; hidden from Win10 UI -->
+    <nav class="menubar menubar--compat" id="menubar" aria-label="Main menu" hidden>
+      <div class="menu" id="menu-file"><button type="button" class="menu__btn" aria-haspopup="true" aria-expanded="false">File</button><div class="menu__list" role="menu"><button type="button" class="menu__item" role="menuitem" data-action="new-game">New Game</button><button type="button" class="menu__item" role="menuitem" data-action="restart-round">Restart Round</button><button type="button" class="menu__item" role="menuitem" data-action="back-home">Back to Home</button><div class="menu__sep" role="separator"></div><button type="button" class="menu__item" role="menuitem" data-action="import-word">Import Encrypted Word&hellip;</button></div></div>
+      <div class="menu" id="menu-edit"><button type="button" class="menu__btn" aria-haspopup="true" aria-expanded="false">Edit</button><div class="menu__list" role="menu"><button type="button" class="menu__item" role="menuitem" data-action="clear-word">Clear Word Box</button><button type="button" class="menu__item" role="menuitem" data-action="clear-payload">Clear Payload Box</button><div class="menu__sep" role="separator"></div><button type="button" class="menu__item" role="menuitem" data-action="reset-round">Reset Current Round</button></div></div>
+      <div class="menu" id="menu-view"><button type="button" class="menu__btn" aria-haspopup="true" aria-expanded="false">View</button><div class="menu__list" role="menu"><button type="button" class="menu__item" role="menuitem" data-action="toggle-hint">Show Hint</button><button type="button" class="menu__item" role="menuitem" data-action="toggle-lives">Hide Lives</button><div class="menu__sep" role="separator"></div><button type="button" class="menu__item" role="menuitem" data-action="clear-doodles">Clear Canvas Doodles</button></div></div>
+      <div class="menu" id="menu-help"><button type="button" class="menu__btn" aria-haspopup="true" aria-expanded="false">Help</button><div class="menu__list" role="menu"><button type="button" class="menu__item" role="menuitem" data-action="how-to-play">How to Play</button><button type="button" class="menu__item" role="menuitem" data-action="about">About Hangbitch</button></div></div>
+    </nav>
+    <div class="toolbar menubar toolbar--compat" role="toolbar" aria-label="Tools" hidden></div>
   </div>
+<!-- ===================== WORKSPACE ===================== -->
+    <main class="workspace">
+    <div class="paint-surface">
+      <!-- ---------- VIEW: HOME ---------- -->
+      <section class="view" id="view-home">
+        <div class="paint-canvas">
+          <h1 class="canvas-title">Untitled &mdash; Hangbitch</h1>
+          <p class="canvas-text">Five lives, one word, and key tools in a modern Paint-style workspace. Everything runs locally in your browser.</p>
 
-  <!-- ===================== WORKSPACE ===================== -->
-  <main class="workspace">
+          <div class="home-grid">
+            <button type="button" class="pick" id="btn-go-play">
+              <span class="pick__icon" aria-hidden="true">
+                <svg viewBox="0 0 32 32" width="34" height="34" role="presentation"><path d="M7 6v20M7 8h14v8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="21" cy="19" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M21 23.5v4M18.5 27.5h5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+              </span>
+              <span class="pick__title">Play a game</span>
+              <span class="pick__sub">Type a word yourself, or paste an encrypted word someone sent you. Five lives, one beer.</span>
+            </button>
 
-    <!-- ---------- VIEW: HOME ---------- -->
-    <section class="view" id="view-home">
-      <div class="paint-canvas">
-        <h1 class="canvas-title">untitled &mdash; Hangbitch</h1>
-        <p class="canvas-text">Five lives, one word &mdash; and a set of key tools, all wearing an old
-          drawing program as a costume. Pick a job below.</p>
-
-        <div class="home-grid">
-          <button type="button" class="pick" id="btn-go-play">
-            <span class="pick__icon" aria-hidden="true">
-              <svg viewBox="0 0 32 32" width="34" height="34" role="presentation">
-                <path d="M6 4 v24 M6 6 h16 v8" fill="none" stroke="#000000" stroke-width="2.5"/>
-                <circle cx="22" cy="18" r="5" fill="none" stroke="#000000" stroke-width="2.5"/>
-                <path d="M22 23 v5 M19.5 28 h5" fill="none" stroke="#000000" stroke-width="2.5"/>
-              </svg>
-            </span>
-            <span class="pick__title">Play a game</span>
-            <span class="pick__sub">Type a word yourself, or paste an encrypted word someone sent you. Five lives, one beer.</span>
-          </button>
-
-          <button type="button" class="pick" id="btn-go-encrypt">
-            <span class="pick__icon" aria-hidden="true">
-              <svg viewBox="0 0 32 32" width="34" height="34" role="presentation">
-                <path d="M16 4 v12" fill="none" stroke="#000000" stroke-width="2.5"/>
-                <rect x="9" y="16" width="14" height="11" fill="none" stroke="#000000" stroke-width="2.5"/>
-                <path d="M11 16 v-3 a5 5 0 0 1 10 0 v3" fill="none" stroke="#000000" stroke-width="2.5"/>
-              </svg>
-            </span>
-            <span class="pick__title">Generate a word</span>
-            <span class="pick__sub">Encrypt a secret word for the host, then send them the payload. Nobody sees the word &mdash; not even the host.</span>
-          </button>
-        </div>
-
-        <div class="actions actions--end">
-          <button type="button" class="btn" id="btn-open-keys">Key settings&hellip;</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ---------- VIEW: PLAY ---------- -->
-    <section class="view hidden" id="view-play">
-      <div class="paint-canvas">
-        <div class="setup-grid">
-          <div class="groupbox">
-            <span class="groupbox__label">Type a word</span>
-            <p class="muted">Play on your own right now. No keys, no payload, no internet.</p>
-            <label class="field">
-              <span>Secret word or phrase</span>
-              <input type="text" id="manual-word" autocomplete="off" spellcheck="false" placeholder="e.g. BALAY NI LIBAY BILAT">
-            </label>
-            <label class="field">
-              <span>Hint (optional)</span>
-              <input type="text" id="manual-hint" autocomplete="off" spellcheck="false" placeholder="e.g. tongue twister">
-            </label>
-            <button type="button" class="btn btn--primary" id="btn-manual-start">Start game</button>
-            <p class="status" id="manual-status" role="status" aria-live="polite"></p>
+            <button type="button" class="pick" id="btn-go-encrypt">
+              <span class="pick__icon" aria-hidden="true">
+                <svg viewBox="0 0 32 32" width="34" height="34" role="presentation"><path d="M16 5v11" fill="none" stroke="currentColor" stroke-width="2"/><rect x="9.5" y="16" width="13" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 16v-3a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+              </span>
+              <span class="pick__title">Generate a word</span>
+              <span class="pick__sub">Encrypt a secret word for the host, then send them the payload. Nobody sees the word.</span>
+            </button>
           </div>
 
-          <div class="groupbox">
-            <span class="groupbox__label">Paste an encrypted word</span>
-            <p class="muted">Someone else&rsquo;s encrypted payload, unlocked with this app&rsquo;s key.</p>
-            <label class="field">
-              <span>Encrypted payload</span>
-              <textarea id="payload-input" rows="4" spellcheck="false" placeholder="HANGBITCH.eyJ2IjoxLCJhbGciOi&hellip;"></textarea>
-            </label>
-            <button type="button" class="btn" id="btn-paste-start">Paste &amp; start</button>
-            <button type="button" class="btn" id="btn-clear-payload">Clear</button>
-            <p class="hint" id="decrypt-key-note">Uses the app&rsquo;s key &mdash; nothing to set up.</p>
-            <p class="status" id="payload-meta" aria-live="polite"></p>
-            <p class="status" id="import-status" role="status" aria-live="polite"></p>
+          <div class="actions actions--end">
+            <button type="button" class="btn" id="btn-open-keys">Key settings&hellip;</button>
           </div>
         </div>
+      </section>
 
-        <div class="actions actions--end">
-          <button type="button" class="btn" id="btn-home-from-play">Back</button>
+      <!-- ---------- VIEW: PLAY ---------- -->
+      <section class="view hidden" id="view-play">
+        <div class="paint-canvas">
+          <div class="setup-grid">
+            <div class="groupbox">
+              <span class="groupbox__label">Type a word</span>
+              <p class="muted">Play on your own right now. No keys, no payload, no internet.</p>
+              <label class="field"><span>Secret word or phrase</span><input type="text" id="manual-word" autocomplete="off" spellcheck="false" placeholder="e.g. BALAY NI LIBAY BILAT"></label>
+              <label class="field"><span>Hint (optional)</span><input type="text" id="manual-hint" autocomplete="off" spellcheck="false" placeholder="e.g. tongue twister"></label>
+              <button type="button" class="btn btn--primary" id="btn-manual-start">Start game</button>
+              <p class="status" id="manual-status" role="status" aria-live="polite"></p>
+            </div>
+
+            <div class="groupbox">
+              <span class="groupbox__label">Paste an encrypted word</span>
+              <p class="muted">Someone else&rsquo;s encrypted payload, unlocked with this app&rsquo;s key.</p>
+              <label class="field"><span>Encrypted payload</span><textarea id="payload-input" rows="4" spellcheck="false" placeholder="HANGBITCH.eyJ2IjoxLCJhbGciOi&hellip;"></textarea></label>
+              <button type="button" class="btn" id="btn-paste-start">Paste &amp; start</button>
+              <button type="button" class="btn" id="btn-clear-payload">Clear</button>
+              <p class="hint" id="decrypt-key-note">Uses the app&rsquo;s key &mdash; nothing to set up.</p>
+              <p class="status" id="payload-meta" aria-live="polite"></p>
+              <p class="status" id="import-status" role="status" aria-live="polite"></p>
+            </div>
+          </div>
+          <div class="actions actions--end"><button type="button" class="btn" id="btn-home-from-play">Back</button></div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ---------- VIEW: GAME ---------- -->
-    <section class="view hidden" id="view-game">
-      <div class="game-grid" aria-label="Game board">
-
-        <div class="stage-col">
-          <div class="canvas-frame">
-            <svg id="hangman-svg" class="canvas-svg" viewBox="0 0 320 330" role="img"
-                 aria-labelledby="hangman-title hangman-desc" data-stage="0">
-              <title id="hangman-title">Hangbitch illustration</title>
-              <desc id="hangman-desc">A rough hand-drawn gallows. One body part is scribbled in for each wrong guess; the fifth wrong guess adds a beer mug.</desc>
-
-              <g class="gallows" aria-hidden="true">
-                <path class="ink" d="M8 305 L150 303"/>
-                <path class="ink" d="M37 306 L34 26"/>
-                <path class="ink" d="M34 26 L238 30"/>
-                <path class="ink" d="M233 31 L230 64"/>
-                <path class="ink" d="M221 64 q9 -7 19 1 q-9 6 -19 -1 z"/>
-              </g>
-
-              <g class="figure">
-                <g class="part" data-part="head">
-                  <circle class="ink" cx="230" cy="92" r="27"/>
-                  <!-- Hair -->
-                  <path class="ink" d="M208 78 q14 -16 44 0 q-15 -6 -22 -6 q-6 -6 0 -12 q6 -6 12 0 q14 -6 22 -6" fill="none" stroke="#404040" stroke-width="2.5"/>
-                  <path class="ink" d="M204 82 q10 -12 32 0 q-8 -4 -14 -4 q-4 -4 0 -8 q4 -4 8 0 q12 -4 14 -4" fill="none" stroke="#404040" stroke-width="2.5"/>
-                  <path class="ink" d="M218 84 l9 9 M227 84 l-9 9"/>
-                  <path class="ink" d="M235 84 l9 9 M244 84 l-9 9"/>
-                  <path class="ink" d="M219 105 q10 9 21 0"/>
-                  <path class="ink" d="M226 110 q4 -6 8 0"/>
-                </g>
-
-                <g class="part" data-part="body">
-                  <path class="ink" d="M230 119 L228 191"/>
-                </g>
-
-                <g class="part" data-part="arms">
-                  <path class="ink" d="M229 134 L195 168"/>
-                  <path class="ink" d="M229 134 L263 166"/>
-                </g>
-
-                <g class="part" data-part="legs">
-                  <path class="ink" d="M228 191 L205 245"/>
-                  <path class="ink" d="M205 245 L182 249"/>
-                  <path class="ink" d="M228 191 L251 245"/>
-                  <path class="ink" d="M251 245 L272 249"/>
-                </g>
-
-                <g class="part" data-part="beer">
-                  <path class="beer-glass" d="M268 196 L302 196 L300 242 L270 242 z"/>
-                  <path class="beer-foam" d="M265 196 q20 -14 42 0 q-21 8 -42 0 z"/>
-                  <path class="ink" d="M302 206 q16 11 0 23"/>
-                  <circle class="beer-bubble" cx="280" cy="212" r="3"/>
-                  <circle class="beer-bubble" cx="290" cy="224" r="2.4"/>
-                  <circle class="beer-bubble" cx="277" cy="230" r="1.8"/>
-                </g>
-              </g>
-
-              <g id="doodles" class="doodles"></g>
-            </svg>
-
-            <div class="thought-bubble thought-bubble--win hidden" id="thought-bubble-win" role="status" aria-live="polite">
-              <div class="thought-bubble__body">Nice one brox!</div>
-              <div class="thought-bubble__tail">
-                <span class="thought-bubble__dot"></span>
-                <span class="thought-bubble__dot"></span>
-                <span class="thought-bubble__dot"></span>
+      <!-- ---------- VIEW: GAME ---------- -->
+      <section class="view hidden" id="view-game">
+        <div class="paint-canvas paint-canvas--board">
+          <div class="game-grid" aria-label="Game board">
+            <div class="stage-col">
+              <div class="canvas-frame">
+                <svg id="hangman-svg" class="canvas-svg" viewBox="0 0 320 330" role="img" aria-labelledby="hangman-title hangman-desc" data-stage="0">
+                  <title id="hangman-title">Hangbitch illustration</title>
+                  <desc id="hangman-desc">A hand-drawn gallows. One body part is added for each wrong guess; the fifth wrong guess adds a beer mug.</desc>
+                  <g class="gallows" aria-hidden="true"><path class="ink" d="M8 305 L150 303"/><path class="ink" d="M37 306 L34 26"/><path class="ink" d="M34 26 L238 30"/><path class="ink" d="M233 31 L230 64"/><path class="ink" d="M221 64 q9 -7 19 1 q-9 6 -19 -1 z"/></g>
+                  <g class="figure">
+                    <g class="part" data-part="head"><circle class="ink" cx="230" cy="92" r="27"/><path class="ink" d="M208 78 q14 -16 44 0 q-15 -6 -22 -6 q-6 -6 0 -12 q6 -6 12 0 q14 -6 22 -6" fill="none" stroke="#404040" stroke-width="2.5"/><path class="ink" d="M204 82 q10 -12 32 0 q-8 -4 -14 -4 q-4 -4 0 -8 q4 -4 8 0 q12 -4 14 -4" fill="none" stroke="#404040" stroke-width="2.5"/><path class="ink" d="M218 84 l9 9 M227 84 l-9 9"/><path class="ink" d="M235 84 l9 9 M244 84 l-9 9"/><path class="ink" d="M219 105 q10 9 21 0"/><path class="ink" d="M226 110 q4 -6 8 0"/></g>
+                    <g class="part" data-part="body"><path class="ink" d="M230 119 L228 191"/></g>
+                    <g class="part" data-part="arms"><path class="ink" d="M229 134 L195 168"/><path class="ink" d="M229 134 L263 166"/></g>
+                    <g class="part" data-part="legs"><path class="ink" d="M228 191 L205 245"/><path class="ink" d="M205 245 L182 249"/><path class="ink" d="M228 191 L251 245"/><path class="ink" d="M251 245 L272 249"/></g>
+                    <g class="part" data-part="beer"><path class="beer-glass" d="M268 196 L302 196 L300 242 L270 242 z"/><path class="beer-foam" d="M265 196 q20 -14 42 0 q-21 8 -42 0 z"/><path class="ink" d="M302 206 q16 11 0 23"/><circle class="beer-bubble" cx="280" cy="212" r="3"/><circle class="beer-bubble" cx="290" cy="224" r="2.4"/><circle class="beer-bubble" cx="277" cy="230" r="1.8"/></g>
+                  </g>
+                  <g id="doodles" class="doodles"></g>
+                </svg>
+                <div class="thought-bubble thought-bubble--win hidden" id="thought-bubble-win" role="status" aria-live="polite"><div class="thought-bubble__body">Nice one brox!</div><div class="thought-bubble__tail"><span class="thought-bubble__dot"></span><span class="thought-bubble__dot"></span><span class="thought-bubble__dot"></span></div></div>
+                <div class="thought-bubble thought-bubble--nice hidden" id="thought-bubble-nice" role="status" aria-live="polite"><div class="thought-bubble__body">Nice!</div><div class="thought-bubble__tail"><span class="thought-bubble__dot"></span><span class="thought-bubble__dot"></span><span class="thought-bubble__dot"></span></div></div>
+                <div class="thought-bubble thought-bubble--loss hidden" id="thought-bubble-loss" role="status" aria-live="polite"><div class="thought-bubble__body">BOBO!<span class="thought-bubble__answer" id="thought-bubble-answer"></span></div><div class="thought-bubble__tail"><span class="thought-bubble__dot"></span><span class="thought-bubble__dot"></span><span class="thought-bubble__dot"></span></div></div>
               </div>
+              <p class="caption" id="stage-caption">Gallows only &mdash; five mistakes and he gets a beer.</p>
+              <div class="lives" id="lives-display" role="status" aria-live="polite"><span class="label">Lives</span><span class="lives__icons" id="lives-icons" aria-hidden="true"></span><span class="lives__text" id="lives-text">5 / 5</span></div>
             </div>
 
-            <div class="thought-bubble thought-bubble--nice hidden" id="thought-bubble-nice" role="status" aria-live="polite">
-              <div class="thought-bubble__body">Nice!</div>
-              <div class="thought-bubble__tail">
-                <span class="thought-bubble__dot"></span>
-                <span class="thought-bubble__dot"></span>
-                <span class="thought-bubble__dot"></span>
-              </div>
-            </div>
-
-            <div class="thought-bubble thought-bubble--loss hidden" id="thought-bubble-loss" role="status" aria-live="polite">
-              <div class="thought-bubble__body">BOBO!<span class="thought-bubble__answer" id="thought-bubble-answer"></span></div>
-              <div class="thought-bubble__tail">
-                <span class="thought-bubble__dot"></span>
-                <span class="thought-bubble__dot"></span>
-                <span class="thought-bubble__dot"></span>
+            <div class="play-col">
+              <div class="groupbox">
+                <span class="groupbox__label">Guess a letter</span>
+                <p class="muted">Correct guesses reveal every occurrence. Wrong guesses cost exactly one life.</p>
+                <div class="word-display" id="word-display" aria-live="polite" aria-label="Secret word"><p class="word-display__placeholder" id="word-placeholder">Type a word or paste an encrypted payload to begin.</p></div>
+                <div class="message" id="message" role="status" aria-live="polite"></div>
+                <div class="letter-grid" id="letter-grid" role="group" aria-label="Letter guesses"></div>
+                <div class="actions"><button type="button" class="btn" id="btn-hint" disabled>Reveal hint</button><button type="button" class="btn" id="btn-restart" disabled>Restart round</button><button type="button" class="btn" id="btn-new-word">New game</button></div>
+                <div class="hint-box hidden" id="hint-box"><span class="label">Hint</span><p id="hint-text"></p></div>
+                <div class="answer-box hidden" id="answer-box"><span class="label">Answer</span><p id="answer-text"></p></div>
               </div>
             </div>
           </div>
-
-          <p class="caption" id="stage-caption">Gallows only &mdash; five mistakes and he gets a beer.</p>
-
-          <div class="lives" id="lives-display" role="status" aria-live="polite">
-            <span class="label">Lives</span>
-            <span class="lives__icons" id="lives-icons" aria-hidden="true"></span>
-            <span class="lives__text" id="lives-text">5 / 5</span>
-          </div>
         </div>
+      </section>
 
-        <div class="play-col">
-          <div class="groupbox">
-            <span class="groupbox__label">Guess a letter</span>
-            <p class="muted">Correct guesses reveal every occurrence. Wrong guesses cost exactly one life.</p>
-
-            <div class="word-display" id="word-display" aria-live="polite" aria-label="Secret word">
-              <p class="word-display__placeholder" id="word-placeholder">Type a word or paste an encrypted payload to begin.</p>
+      <!-- ---------- VIEW: ENCRYPT ---------- -->
+      <section class="view hidden" id="view-encrypt">
+        <div class="paint-canvas">
+          <div class="encrypt-grid">
+            <div class="groupbox">
+              <span class="groupbox__label">1. Type your secret</span>
+              <p class="muted">Encryption happens in this browser. The word never leaves your device in readable form.</p>
+              <label class="field"><span>Secret word or phrase <span class="counter" id="word-counter">0 / 500</span></span><textarea id="word" rows="2" spellcheck="false" autocomplete="off" placeholder="e.g. BALAY NI LIBAY BILAT"></textarea></label>
+              <label class="field"><span>Hint (optional) <span class="counter" id="hint-counter">0 / 300</span></span><input type="text" id="hint" autocomplete="off" spellcheck="false" placeholder="e.g. tongue twister"></label>
+              <p class="status" id="form-status" role="status" aria-live="polite"></p>
+              <div class="actions"><button type="button" class="btn btn--primary" id="btn-encrypt">Encrypt</button><button type="button" class="btn" id="btn-clear">Clear</button></div>
+              <p class="fineprint">Your word is normalised slightly before encryption (Unicode NFC, tabs and line breaks become single spaces, outer whitespace trimmed). Spaces and punctuation are kept exactly and are shown to guessers.</p>
             </div>
-
-            <div class="message" id="message" role="status" aria-live="polite"></div>
-
-            <div class="letter-grid" id="letter-grid" role="group" aria-label="Letter guesses"></div>
-
-            <div class="actions">
-              <button type="button" class="btn" id="btn-hint" disabled>Reveal hint</button>
-              <button type="button" class="btn" id="btn-restart" disabled>Restart round</button>
-              <button type="button" class="btn" id="btn-new-word">New game</button>
-            </div>
-
-            <div class="hint-box hidden" id="hint-box">
-              <span class="label">Hint</span>
-              <p id="hint-text"></p>
-            </div>
-
-            <div class="answer-box hidden" id="answer-box">
-              <span class="label">Answer</span>
-              <p id="answer-text"></p>
+            <div class="groupbox">
+              <span class="groupbox__label">2. Send it</span>
+              <p class="muted">Copy the payload and send it to the host. It targets this app&rsquo;s key.</p>
+              <label class="field"><span>Encrypted payload</span><textarea id="payload" rows="7" readonly spellcheck="false" placeholder="Your encrypted payload appears here."></textarea></label>
+              <div class="actions"><button type="button" class="btn btn--primary" id="btn-copy" disabled>Copy encrypted payload</button><button type="button" class="btn" id="btn-reset" disabled>Start over</button></div>
+              <p class="status" id="encrypt-status" role="status" aria-live="polite"></p>
+              <div class="success hidden" id="success-box"><span class="label">Encryption complete</span><p>Send the payload above to the host. They will paste it into <em>Play a game</em> &mdash; you never send the plaintext word and no password is involved.</p><p class="hint">Only the holder of the matching private key can read it.</p></div>
             </div>
           </div>
+          <div class="actions actions--end"><button type="button" class="btn" id="btn-home-from-encrypt">Back</button></div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ---------- VIEW: ENCRYPT ---------- -->
-    <section class="view hidden" id="view-encrypt">
-      <div class="paint-canvas">
-        <div class="encrypt-grid">
-          <div class="groupbox">
-            <span class="groupbox__label">1. Type your secret</span>
-            <p class="muted">Encryption happens in this browser. The word never leaves your device in readable form.</p>
-
-            <label class="field">
-              <span>Secret word or phrase <span class="counter" id="word-counter">0 / 500</span></span>
-              <textarea id="word" rows="2" spellcheck="false" autocomplete="off"
-                        placeholder="e.g. BALAY NI LIBAY BILAT"></textarea>
-            </label>
-
-            <label class="field">
-              <span>Hint (optional) <span class="counter" id="hint-counter">0 / 300</span></span>
-              <input type="text" id="hint" autocomplete="off" spellcheck="false"
-                     placeholder="e.g. tongue twister">
-            </label>
-
-            <p class="status" id="form-status" role="status" aria-live="polite"></p>
-
-            <div class="actions">
-              <button type="button" class="btn btn--primary" id="btn-encrypt">Encrypt</button>
-              <button type="button" class="btn" id="btn-clear">Clear</button>
-            </div>
-
-            <p class="fineprint">
-              Your word is normalised slightly before encryption (Unicode NFC, tabs and line breaks become single spaces,
-              outer whitespace trimmed). Spaces and punctuation are kept exactly and are shown to guessers.
-            </p>
+      <!-- ---------- VIEW: KEY SETTINGS ---------- -->
+      <section class="view hidden" id="view-keys">
+        <div class="paint-canvas" id="setup-panel" aria-labelledby="setup-title">
+          <span class="groupbox__label" id="setup-title">Key settings</span>
+          <p class="muted">One key pair runs the whole app: <em>Generate a word</em> encrypts to its public half and <em>Play a game</em> decrypts with its private half. A built-in pair ships with the app, so there is nothing to set up &mdash; change it here if you want your own.</p>
+          <div id="key-state" class="state state--locked" role="status"><span class="state__dot" aria-hidden="true"></span><span id="key-state-text">Loading key&hellip;</span></div>
+          <div class="results" id="key-results">
+            <div class="fp-block"><div><span class="label">Key fingerprint</span><code class="fp" id="key-fingerprint">&mdash;</code><p class="hint">Both sides must use the same key pair. This fingerprint is how you check it.</p></div><div class="key-actions"><button type="button" class="btn" id="btn-copy-public">Copy public key</button><button type="button" class="btn" id="btn-download-public">Download public key</button><button type="button" class="btn" id="btn-use-default">Use built-in key</button></div></div>
+            <label class="field"><span>Public key (PEM)</span><textarea id="public-pem" rows="5" readonly spellcheck="false"></textarea></label>
           </div>
-
-          <div class="groupbox">
-            <span class="groupbox__label">2. Send it</span>
-            <p class="muted">Copy the payload and send it to the host. It targets this app&rsquo;s key.</p>
-
-            <label class="field">
-              <span>Encrypted payload</span>
-              <textarea id="payload" rows="7" readonly spellcheck="false"
-                        placeholder="Your encrypted payload appears here."></textarea>
-            </label>
-
-            <div class="actions">
-              <button type="button" class="btn btn--primary" id="btn-copy" disabled>Copy encrypted payload</button>
-              <button type="button" class="btn" id="btn-reset" disabled>Start over</button>
-            </div>
-
-            <p class="status" id="encrypt-status" role="status" aria-live="polite"></p>
-
-            <div class="success hidden" id="success-box">
-              <span class="label">Encryption complete</span>
-              <p>Send the payload above to the host. They will paste it into <em>Play a game</em> &mdash; you never send
-                the plaintext word and no password is involved.</p>
-              <p class="hint">Only the holder of the matching private key can read it.</p>
-            </div>
+          <div class="setup-grid">
+            <div class="groupbox"><span class="groupbox__label">Change key pair</span><p class="muted">Generate a fresh RSA-OAEP 3072-bit pair and use it instead of the built-in one. It is remembered in this browser, and a passphrase-protected backup downloads for safekeeping.</p><label class="field"><span>Backup passphrase</span><input type="password" id="gen-pass" autocomplete="new-password" spellcheck="false" placeholder="at least 8 characters"></label><label class="field"><span>Confirm passphrase</span><input type="password" id="gen-pass-confirm" autocomplete="new-password" spellcheck="false" placeholder="repeat it"></label><p class="hint" id="gen-pass-hint" aria-live="polite">Aim for 12+ characters. This passphrase only unlocks your key backup.</p><button type="button" class="btn btn--primary" id="btn-generate">Generate a new key pair</button><p class="hint hint--warn">A backup file will download. Move it somewhere safe and out of this Git folder.</p></div>
+            <div class="groupbox"><span class="groupbox__label">Restore from a backup</span><p class="muted">Bring a key pair back on a fresh install or another PC. Takes a few seconds (600,000 PBKDF2 rounds).</p><label class="field"><span>Backup file (.json)</span><input type="file" id="restore-file" accept=".json,application/json,text/plain"></label><label class="field"><span>&hellip;or paste the backup text</span><textarea id="restore-text" rows="3" spellcheck="false" placeholder='{"type":"HANGBITCH-PRIVATE-KEY-BACKUP", ...}'></textarea></label><label class="field"><span>Backup passphrase</span><input type="password" id="restore-pass" autocomplete="current-password" spellcheck="false"></label><button type="button" class="btn" id="btn-restore">Restore &amp; use</button></div>
           </div>
+          <p class="status" id="setup-status" role="status" aria-live="polite"></p>
+          <div class="actions actions--end"><button type="button" class="btn" id="btn-home-from-keys">Back</button></div>
         </div>
-
-        <div class="actions actions--end">
-          <button type="button" class="btn" id="btn-home-from-encrypt">Back</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ---------- VIEW: KEY SETTINGS ---------- -->
-    <section class="view hidden" id="view-keys">
-      <div class="paint-canvas" id="setup-panel" aria-labelledby="setup-title">
-        <span class="groupbox__label" id="setup-title">Key settings</span>
-        <p class="muted">One key pair runs the whole app: <em>Generate a word</em> encrypts to its public half and
-          <em>Play a game</em> decrypts with its private half. A built-in pair ships with the app, so there is nothing
-          to set up &mdash; change it here if you want your own.</p>
-
-        <div id="key-state" class="state state--locked" role="status">
-          <span class="state__dot" aria-hidden="true"></span>
-          <span id="key-state-text">Loading key&hellip;</span>
-        </div>
-
-        <div class="results" id="key-results">
-          <div class="fp-block">
-            <div>
-              <span class="label">Key fingerprint</span>
-              <code class="fp" id="key-fingerprint">&mdash;</code>
-              <p class="hint">Both sides must use the same key pair. This fingerprint is how you check it.</p>
-            </div>
-            <div class="key-actions">
-              <button type="button" class="btn" id="btn-copy-public">Copy public key</button>
-              <button type="button" class="btn" id="btn-download-public">Download public key</button>
-              <button type="button" class="btn" id="btn-use-default">Use built-in key</button>
-            </div>
-          </div>
-          <label class="field">
-            <span>Public key (PEM)</span>
-            <textarea id="public-pem" rows="5" readonly spellcheck="false"></textarea>
-          </label>
-        </div>
-
-        <div class="setup-grid">
-          <div class="groupbox">
-            <span class="groupbox__label">Change key pair</span>
-            <p class="muted">Generate a fresh RSA-OAEP 3072-bit pair and use it instead of the built-in one. It is
-              remembered in this browser, and a passphrase-protected backup downloads for safekeeping.</p>
-            <label class="field">
-              <span>Backup passphrase</span>
-              <input type="password" id="gen-pass" autocomplete="new-password" spellcheck="false" placeholder="at least 8 characters">
-            </label>
-            <label class="field">
-              <span>Confirm passphrase</span>
-              <input type="password" id="gen-pass-confirm" autocomplete="new-password" spellcheck="false" placeholder="repeat it">
-            </label>
-            <p class="hint" id="gen-pass-hint" aria-live="polite">Aim for 12+ characters. This passphrase only unlocks your key backup.</p>
-            <button type="button" class="btn btn--primary" id="btn-generate">Generate a new key pair</button>
-            <p class="hint hint--warn">A backup file will download. Move it somewhere safe and out of this Git folder.</p>
-          </div>
-
-          <div class="groupbox">
-            <span class="groupbox__label">Restore from a backup</span>
-            <p class="muted">Bring a key pair back on a fresh install or another PC. Takes a few seconds (600,000 PBKDF2
-              rounds).</p>
-            <label class="field">
-              <span>Backup file (.json)</span>
-              <input type="file" id="restore-file" accept=".json,application/json,text/plain">
-            </label>
-            <label class="field">
-              <span>&hellip;or paste the backup text</span>
-              <textarea id="restore-text" rows="3" spellcheck="false" placeholder='{"type":"HANGBITCH-PRIVATE-KEY-BACKUP", ...}'></textarea>
-            </label>
-            <label class="field">
-              <span>Backup passphrase</span>
-              <input type="password" id="restore-pass" autocomplete="current-password" spellcheck="false">
-            </label>
-            <button type="button" class="btn" id="btn-restore">Restore &amp; use</button>
-          </div>
-        </div>
-
-        <p class="status" id="setup-status" role="status" aria-live="polite"></p>
-
-        <div class="actions actions--end">
-          <button type="button" class="btn" id="btn-home-from-keys">Back</button>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </main>
-
-  <!-- ===================== COLOUR PALETTE ===================== -->
-  <div class="palette" id="palette" role="group" aria-label="Drawing colour">
+<!-- ===================== COLOUR PALETTE (compat: app.js/tests expect #palette + 28 data-color swatches) ===================== -->
+  <div class="palette palette--compat" id="palette" role="group" aria-label="Drawing colour" hidden>
     <span class="palette__current" aria-hidden="true">
-      <span class="palette__well" id="color-current"></span>
+      <span class="palette__well" id="color-current-compat" aria-hidden="true"></span>
     </span>
     <div class="palette__grid">
       <button type="button" class="swatch swatch-1"  data-color="#000000" title="Black #000000"></button>
@@ -666,6 +424,11 @@
     <span class="statusbar__cell" id="status-lives">Lives: 7 / 7</span>
     <span class="statusbar__cell statusbar__cell--wide" id="status-tips">Pick a job to begin.</span>
     <span class="statusbar__cell" id="sw-status">offline cache not registered</span>
+    <span class="statusbar__zoom" aria-label="Zoom controls">
+      <button type="button" class="zoom-btn" aria-label="Zoom out" disabled>&minus;</button>
+      <span class="zoom-value">100%</span>
+      <button type="button" class="zoom-btn" aria-label="Zoom in" disabled>+</button>
+    </span>
   </div>
 
   <!-- Update notice: shown when a new service worker is waiting to activate. -->
