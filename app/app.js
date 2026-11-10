@@ -557,10 +557,11 @@
     );
     setLivesStatus(remaining, lives);
 
-    var container = el['word-display'];
-    container.innerHTML = '';
+var container = el['word-display'];
+    var existingGrid = container.querySelector('.word-grid');
 
     if (!round) {
+      container.innerHTML = '';
       var p = document.createElement('p');
       p.className = 'word-display__placeholder';
       p.id = 'word-placeholder';
@@ -569,6 +570,103 @@
       container.setAttribute('aria-label', 'No secret word loaded');
       return;
     }
+
+    // If there is an existing grid, this is an update (letter revealed) —
+    // update tile states in place without rebuilding the DOM.
+    if (existingGrid) {
+      var view = L.renderWord(round);
+      var revealedCount = 0;
+      var letterCount = 0;
+
+      var rows = [];
+      var row = [];
+      view.forEach(function (item) {
+        if (item.char === ' ') {
+          if (row.length) {
+            rows.push(row);
+            row = [];
+          }
+        } else {
+          row.push(item);
+        }
+      });
+      if (row.length) {
+        rows.push(row);
+      }
+
+      // Count total letters
+      rows.forEach(function (rowItems) {
+        rowItems.forEach(function (item) {
+          if (item.guessable) {
+            letterCount++;
+            if (item.revealed) {
+              revealedCount++;
+            }
+          }
+        });
+      });
+
+      container.setAttribute(
+        'aria-label',
+        'Secret word: ' + letterCount + ' letters, ' + revealedCount + ' revealed'
+      );
+
+      // Update each word-row's tiles in place without rebuilding DOM.
+      var groups = existingGrid.querySelectorAll('.word-group');
+      var rowIndex = 0;
+      groups.forEach(function (groupNode) {
+        var rowNode = groupNode.querySelector('.word-row');
+        if (!rowNode) {
+          return;
+        }
+        var tiles = rowNode.querySelectorAll('.tile');
+        var rowItems = rows[rowIndex];
+        if (!rowItems) {
+          return;
+        }
+        rowIndex++;
+
+        var tileIdx = 0;
+        tiles.forEach(function (tile) {
+          if (!rowItems[tileIdx]) {
+            return;
+          }
+          var item = rowItems[tileIdx];
+          tileIdx++;
+
+          if (!item.guessable) {
+            tile.classList.remove('tile--revealed', 'tile--hidden', 'tile--auto');
+            tile.classList.add('tile--fixed');
+            tile.textContent = item.char;
+            return;
+          }
+
+          if (item.revealed) {
+            tile.classList.remove('tile--hidden');
+            tile.classList.add('tile--revealed');
+            if (!/^[A-Za-z]$/.test(item.char)) {
+              tile.classList.add('tile--auto');
+            } else {
+              tile.classList.remove('tile--auto');
+            }
+            var charSpan = tile.querySelector('.tile__char');
+            if (!charSpan) {
+              charSpan = document.createElement('span');
+              charSpan.className = 'tile__char';
+              tile.appendChild(charSpan);
+            }
+            charSpan.textContent = item.char;
+          } else {
+            tile.classList.remove('tile--revealed', 'tile--auto');
+            tile.classList.add('tile--hidden');
+          }
+        });
+      });
+      return;
+    }
+
+    // Fresh phrase render — build DOM and layout
+    container.innerHTML = '';
 
     var view = L.renderWord(round);
     var revealedCount = 0;
@@ -590,18 +688,36 @@
       rows.push(row);
     }
 
-    var groupNode = document.createElement('div');
-    groupNode.className = 'word-group';
+    // Count total letters
+    rows.forEach(function (rowItems) {
+      rowItems.forEach(function (item) {
+        if (item.guessable) {
+          letterCount++;
+          if (item.revealed) {
+            revealedCount++;
+          }
+        }
+      });
+    });
 
+    container.setAttribute(
+      'aria-label',
+      'Secret word: ' + letterCount + ' letters, ' + revealedCount + ' revealed'
+    );
+
+    var groups = [];
     rows.forEach(function (rowItems, index) {
+      var groupNode = document.createElement('div');
+      groupNode.className = 'word-group';
+
       var rowNode = document.createElement('div');
       rowNode.className = 'word-row';
 
-      // // Add word number (1-indexed)
-      // var numSpan = document.createElement('span');
-      // numSpan.className = 'word-num';
-      // numSpan.textContent = (index + 1);
-      // rowNode.appendChild(numSpan);
+      // Add word number (1-indexed)
+      var numSpan = document.createElement('span');
+      numSpan.className = 'word-num';
+      numSpan.textContent = (index + 1);
+      rowNode.appendChild(numSpan);
 
       // Count letters in this word (guessable letters only)
       var wordLetterCount = 0;
@@ -624,9 +740,7 @@
             span.appendChild(underline);
           }
         } else {
-          letterCount++;
           if (item.revealed) {
-            revealedCount++;
             span.classList.add('tile--revealed');
             if (!/^[A-Za-z]$/.test(item.char)) {
               span.classList.add('tile--auto');
@@ -655,14 +769,170 @@
       rowNode.appendChild(countSpan);
 
       groupNode.appendChild(rowNode);
+      groups.push(groupNode);
     });
 
-    container.appendChild(groupNode);
+    // Build the grid container
+    var grid = document.createElement('div');
+    grid.className = 'word-grid';
+    groups.forEach(function (g) {
+      grid.appendChild(g);
+    });
+    container.appendChild(grid);
 
-    container.setAttribute(
-      'aria-label',
-      'Secret word: ' + letterCount + ' letters, ' + revealedCount + ' revealed'
-    );
+    // Schedule layout recalculation for the new phrase
+    scheduleWordLayout();
+  }
+
+  /**
+   * Recalculate the responsive word layout: decide between single-column and
+   * two-column layout, and adjust font size / spacing to fit the available
+   * game display area without scrollbars.
+   */
+  var wordLayoutTimer = null;
+  var wordResizeObserver = null;
+
+  function scheduleWordLayout() {
+    if (wordLayoutTimer) {
+      clearTimeout(wordLayoutTimer);
+    }
+    wordLayoutTimer = setTimeout(applyWordLayout, 50);
+  }
+
+function applyWordLayout() {
+    wordLayoutTimer = null;
+    var container = el['word-display'];
+    if (!container) {
+      return;
+    }
+
+    var grid = container.querySelector('.word-grid');
+    if (!grid) {
+      return;
+    }
+
+    // Collect all word-group elements (they may be nested in columns from a previous layout)
+    var groups = Array.prototype.slice.call(grid.querySelectorAll('.word-group'));
+    if (groups.length === 0) {
+      return;
+    }
+
+    // Remove previous layout classes and column wrappers
+    grid.classList.remove('word-grid--two');
+    container.classList.remove('word-display--sm', 'word-display--xs');
+
+    // Remove any existing column wrappers, moving groups back to grid
+    var existingColumns = grid.querySelectorAll('.word-column');
+    existingColumns.forEach(function (col) {
+      while (col.firstChild) {
+        grid.insertBefore(col.firstChild, col);
+      }
+      col.remove();
+    });
+
+    // Measure available space
+    var containerWidth = container.clientWidth;
+    var containerHeight = container.clientHeight;
+    if (!containerWidth || !containerHeight) {
+      return;
+    }
+
+    var padding = 24; // container padding
+    var availableWidth = containerWidth - padding;
+    var availableHeight = containerHeight - padding;
+
+    // Measure natural row sizes
+    var maxRowWidth = 0;
+    var rowHeights = [];
+    groups.forEach(function (group) {
+      var row = group.querySelector('.word-row');
+      if (row) {
+        var w = row.scrollWidth;
+        if (w > maxRowWidth) {
+          maxRowWidth = w;
+        }
+        rowHeights.push(group.offsetHeight + 4); // +4 gap
+      }
+    });
+
+    var totalHeight = rowHeights.reduce(function (sum, h) { return sum + h; }, 0) - 4; // remove last gap
+
+    // Decide layout: prefer single column if it fits vertically
+    var useTwoColumns = false;
+    var useSm = false;
+    var useXs = false;
+
+    if (totalHeight > availableHeight) {
+      // Single column too tall: try two columns first
+      useTwoColumns = true;
+      var half = Math.ceil(groups.length / 2);
+      var col1H = 0;
+      var col2H = 0;
+      for (var i = 0; i < groups.length; i++) {
+        if (i < half) {
+          col1H += rowHeights[i];
+        } else {
+          col2H += rowHeights[i];
+        }
+      }
+      var maxColHeight = Math.max(col1H, col2H);
+      if (maxColHeight > availableHeight) {
+        useSm = true;
+      }
+    } else if (maxRowWidth > availableWidth) {
+      // Single column fits height but a row overflows width: try smaller font first
+      // If even small font overflows, use two columns
+      useTwoColumns = true;
+    }
+
+    // Apply font-size class if needed
+    if (useSm) {
+      container.classList.add('word-display--sm');
+    }
+
+    // Apply two-column layout if needed
+    if (useTwoColumns) {
+      var half = Math.ceil(groups.length / 2);
+      var col1 = document.createElement('div');
+      col1.className = 'word-column';
+      var col2 = document.createElement('div');
+      col2.className = 'word-column';
+
+      for (var j = 0; j < groups.length; j++) {
+        if (j < half) {
+          col1.appendChild(groups[j]);
+        } else {
+          col2.appendChild(groups[j]);
+        }
+      }
+
+      grid.appendChild(col1);
+      grid.appendChild(col2);
+      grid.classList.add('word-grid--two');
+
+      // After layout, re-measure and possibly shrink further
+      requestAnimationFrame(function () {
+        var col1H = col1.scrollHeight;
+        var col2H = col2.scrollHeight;
+        var maxH = Math.max(col1H, col2H);
+        if (maxH > availableHeight && !container.classList.contains('word-display--sm')) {
+          container.classList.add('word-display--sm');
+        } else if (maxH > availableHeight && container.classList.contains('word-display--sm')) {
+          container.classList.add('word-display--xs');
+        }
+      });
+    }
+  }
+
+  function setupWordLayoutObserver() {
+    if (wordResizeObserver) {
+      return;
+    }
+    if (typeof ResizeObserver !== 'undefined') {
+      wordResizeObserver = new ResizeObserver(function () {
+        scheduleWordLayout();
+      });
+    }
   }
 
   function renderLetters(round) {
@@ -2000,6 +2270,16 @@
     el['hangman-svg'].addEventListener('pointercancel', onCanvasPointerUp);
 
     document.addEventListener('keydown', onKeyDown);
+
+    // Responsive word layout: recalculate on resize and orientation change
+    window.addEventListener('resize', scheduleWordLayout);
+    window.addEventListener('orientationchange', function () {
+      setTimeout(scheduleWordLayout, 200);
+    });
+    setupWordLayoutObserver();
+    if (el['word-display']) {
+      wordResizeObserver.observe(el['word-display']);
+    }
 
     registerServiceWorker();
   }
