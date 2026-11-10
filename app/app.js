@@ -676,7 +676,7 @@
     renderBoard(round);
     renderLetters(round);
     updateStage(0);
-    setMessage('Round ready. ' + L.remainingKeys(round).length + ' distinct letters to find.', 'info');
+    setMessage('Round ready. ' + round.word.split(/\s+/).filter(Boolean).length + ' word/s to guess' + (round.word.split(/\s+/).filter(Boolean).length === 1 ? '' : 's') + '.', 'info');
     setState('Round in progress.');
     setTips('Guess with the on-screen keys or your keyboard.');
     renderKeyState();
