@@ -713,11 +713,11 @@ var container = el['word-display'];
       var rowNode = document.createElement('div');
       rowNode.className = 'word-row';
 
-      // Add word number (1-indexed)
-      var numSpan = document.createElement('span');
-      numSpan.className = 'word-num';
-      numSpan.textContent = (index + 1);
-      rowNode.appendChild(numSpan);
+      // // Add word number (1-indexed)
+      // var numSpan = document.createElement('span');
+      // numSpan.className = 'word-num';
+      // numSpan.textContent = (index + 1);
+      // rowNode.appendChild(numSpan);
 
       // Count letters in this word (guessable letters only)
       var wordLetterCount = 0;
