@@ -693,6 +693,10 @@ var container = el['word-display'];
           } else {
             tile.classList.remove('tile--revealed', 'tile--auto');
             tile.classList.add('tile--hidden');
+            var charSpan = tile.querySelector('.tile__char');
+            if (charSpan) {
+              charSpan.remove();
+            }
           }
         });
       });
