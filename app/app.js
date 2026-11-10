@@ -97,6 +97,37 @@
     winDialogTimer: null      // delayed win message-dialog timer
   };
 
+  // View display preferences (persisted in localStorage)
+  var viewPrefs = {
+    showWordNum: false,   // 'View word num' — unchecked by default
+    showWordCount: true   // 'View word count' — checked by default
+  };
+
+  function loadViewPrefs() {
+    try {
+      var stored = localStorage.getItem('hb.viewPrefs');
+      if (stored) {
+        var parsed = JSON.parse(stored);
+        if (typeof parsed.showWordNum === 'boolean') {
+          viewPrefs.showWordNum = parsed.showWordNum;
+        }
+        if (typeof parsed.showWordCount === 'boolean') {
+          viewPrefs.showWordCount = parsed.showWordCount;
+        }
+      }
+    } catch (e) {
+      // ignore storage errors; use defaults
+    }
+  }
+
+  function saveViewPrefs() {
+    try {
+      localStorage.setItem('hb.viewPrefs', JSON.stringify(viewPrefs));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }
+
   // Service-worker update lifecycle state.
   var swUpdating = false;           // true while reload-from-update is in flight
   var swReloadPending = false;      // set on controllerchange; reload once
@@ -129,6 +160,9 @@
       'view-play', 'manual-word', 'manual-hint', 'btn-manual-start', 'manual-status',
       'payload-input', 'btn-paste-start', 'btn-clear-payload', 'decrypt-key-note',
       'payload-meta', 'import-status', 'btn-home-from-play',
+
+      // view tab checkboxes
+      'view-word-num', 'view-word-count',
 
       // game
       'view-game', 'hangman-svg', 'stage-caption', 'lives-display', 'lives-icons',
@@ -662,6 +696,22 @@ var container = el['word-display'];
           }
         });
       });
+
+      // Toggle visibility of word numbers and counts per preference
+      groups.forEach(function (groupNode) {
+        var rowNode = groupNode.querySelector('.word-row');
+        if (!rowNode) {
+          return;
+        }
+        var numSpan = rowNode.querySelector('.word-num');
+        if (numSpan) {
+          numSpan.style.display = viewPrefs.showWordNum ? '' : 'none';
+        }
+        var countSpan = rowNode.querySelector('.word-count');
+        if (countSpan) {
+          countSpan.style.display = viewPrefs.showWordCount ? '' : 'none';
+        }
+      });
       return;
     }
 
@@ -713,11 +763,12 @@ var container = el['word-display'];
       var rowNode = document.createElement('div');
       rowNode.className = 'word-row';
 
-      // // Add word number (1-indexed)
-      // var numSpan = document.createElement('span');
-      // numSpan.className = 'word-num';
-      // numSpan.textContent = (index + 1);
-      // rowNode.appendChild(numSpan);
+      // Add word number (1-indexed) — always created, hidden when disabled
+      var numSpan = document.createElement('span');
+      numSpan.className = 'word-num';
+      numSpan.textContent = (index + 1);
+      numSpan.style.display = viewPrefs.showWordNum ? '' : 'none';
+      rowNode.appendChild(numSpan);
 
       // Count letters in this word (guessable letters only)
       var wordLetterCount = 0;
@@ -762,10 +813,11 @@ var container = el['word-display'];
         rowNode.appendChild(span);
       });
 
-      // Add letter count superscript
+      // Add letter count superscript — always created, hidden when disabled
       var countSpan = document.createElement('span');
       countSpan.className = 'word-count';
       countSpan.textContent = wordLetterCount;
+      countSpan.style.display = viewPrefs.showWordCount ? '' : 'none';
       rowNode.appendChild(countSpan);
 
       groupNode.appendChild(rowNode);
@@ -922,6 +974,28 @@ function applyWordLayout() {
         }
       });
     }
+  }
+
+  function updateWordDisplayPrefs() {
+    var container = el['word-display'];
+    if (!container) {
+      return;
+    }
+    var grid = container.querySelector('.word-grid');
+    if (!grid) {
+      return;
+    }
+    var rows = grid.querySelectorAll('.word-row');
+    rows.forEach(function (rowNode) {
+      var numSpan = rowNode.querySelector('.word-num');
+      if (numSpan) {
+        numSpan.style.display = viewPrefs.showWordNum ? '' : 'none';
+      }
+      var countSpan = rowNode.querySelector('.word-count');
+      if (countSpan) {
+        countSpan.style.display = viewPrefs.showWordCount ? '' : 'none';
+      }
+    });
   }
 
   function setupWordLayoutObserver() {
@@ -2089,7 +2163,16 @@ function applyWordLayout() {
   }
 
   function init() {
+    loadViewPrefs();
     cacheElements();
+
+    // Initialize view preference checkboxes from saved state
+    if (el['view-word-num']) {
+      el['view-word-num'].checked = viewPrefs.showWordNum;
+    }
+    if (el['view-word-count']) {
+      el['view-word-count'].checked = viewPrefs.showWordCount;
+    }
 
     var cryptoReady = C.isAvailable();
     if (!cryptoReady) {
@@ -2280,6 +2363,18 @@ function applyWordLayout() {
     if (el['word-display']) {
       wordResizeObserver.observe(el['word-display']);
     }
+
+    // View tab checkboxes: word number and word count visibility
+    el['view-word-num'].addEventListener('change', function () {
+      viewPrefs.showWordNum = el['view-word-num'].checked;
+      saveViewPrefs();
+      updateWordDisplayPrefs();
+    });
+    el['view-word-count'].addEventListener('change', function () {
+      viewPrefs.showWordCount = el['view-word-count'].checked;
+      saveViewPrefs();
+      updateWordDisplayPrefs();
+    });
 
     registerServiceWorker();
   }

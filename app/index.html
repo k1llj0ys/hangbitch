@@ -211,14 +211,17 @@
           </button>
         </div>
       </div>
-      <div class="ribbon__group">
+<div class="ribbon__group">
         <span class="ribbon__group__label">Show or hide</span>
         <label class="ribbon-check"><input type="checkbox" checked disabled> Status bar</label>
       </div>
       <div class="ribbon__group">
         <span class="ribbon__group__label">Display</span>
-        <div class="ribbon__meta"><span class="toolbar__readout" id="tool-readout">Pencil � #000000</span></div>
+        <label class="ribbon-check"><input type="checkbox" id="view-word-num"> View word num</label>
+        <label class="ribbon-check"><input type="checkbox" checked id="view-word-count"> View word count</label>
+        
       </div>
+      <div class="ribbon__meta"><span class="toolbar__readout" id="tool-readout">Pencil � #000000</span></div>
     </div>
 
     <!-- Compatibility: menubar/toolbar/palette classes kept for tests/app hooks; hidden from Win10 UI -->

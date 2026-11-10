@@ -132,7 +132,7 @@ body.maximized .tbtn-ctl--close:hover { border-top-right-radius: 0; }
 
 .ribbon__group {
   position:relative; display:flex; align-items:flex-start; gap:6px;
-  padding: 2px 12px 20px; min-height: 86px;
+  padding: 2px 12px 20px; min-height: 86px; flex-direction: column;
 }
 .ribbon__group:not(:last-child) { border-right: 1px solid var(--stroke); }
 .ribbon__group__label {
@@ -183,7 +183,7 @@ body.maximized .tbtn-ctl--close:hover { border-top-right-radius: 0; }
 .file-backstage__info h2 { color:var(--text); font-size:22px; font-weight:600; margin-bottom:8px; }
 
 .ribbon-check { display:inline-flex; align-items:center; gap:8px; font-size:13px; margin-top:6px; }
-.ribbon__meta { font-size:12px; color:var(--muted); padding-top:6px; }
+.ribbon__meta { font-size:12px; color:var(--muted); padding-top:6px; padding: 2px 12px 20px; }
 .toolbar__readout { font-size:12px; color:var(--muted); }
 
 /* Colors */
