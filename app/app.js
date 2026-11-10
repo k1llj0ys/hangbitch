@@ -169,7 +169,6 @@
       'lives-text', 'word-display', 'message', 'letter-grid', 'doodles',
       'thought-bubble-win', 'thought-bubble-nice', 'thought-bubble-loss', 'thought-bubble-answer',
       'btn-hint', 'btn-restart', 'btn-new-word', 'hint-box', 'hint-text',
-      'answer-box', 'answer-text',
 
       // encrypt
       'view-encrypt', 'word', 'hint', 'word-counter', 'hint-counter', 'form-status',
@@ -485,8 +484,6 @@
     hideThoughtBubbles();
     el['hint-box'].classList.add('hidden');
     el['hint-text'].textContent = '';
-    el['answer-box'].classList.add('hidden');
-    el['answer-text'].textContent = '';
     setMessage('', null);
     resetHintMenuLabel();
   }
@@ -1044,8 +1041,6 @@ function applyWordLayout() {
     hideThoughtBubbles();
     var round = L.createRound(secret);
     state.round = round;
-    el['answer-box'].classList.add('hidden');
-    el['answer-text'].textContent = '';
     el['hint-box'].classList.add('hidden');
     el['hint-text'].textContent = '';
     resetHintMenuLabel();
@@ -1129,8 +1124,6 @@ function applyWordLayout() {
     var round = state.round;
     renderBoard(round);
     renderLetters(round);
-    el['answer-text'].textContent = L.answer(round);
-    el['answer-box'].classList.remove('hidden');
     el['btn-restart'].disabled = false;
     el['btn-hint'].disabled = !round.hint;
 
@@ -1155,13 +1148,18 @@ function applyWordLayout() {
       }, 600);
       state.winDialogTimer = window.setTimeout(function () {
         state.winDialogTimer = null;
-        openMessageDialog('Hangbitch — You win!', [
-          'Solved with ' + (round.lives - round.wrong) + ' of ' + round.lives + ' lives left.',
-          'The secret was: ' + round.word
-        ], [
-          { label: 'Restart round', onClick: restartRound },
-          { label: 'New game', primary: true, onClick: openPlayView }
-        ]);
+        openResultDialog(round, {
+          title: 'Hangbitch — You win!',
+          lines: [
+            'Solved with ' + (round.lives - round.wrong) + ' of ' + round.lives + ' lives left.'
+          ],
+          variant: 'win',
+          showReveal: false,
+          buttons: [
+            { label: 'Restart round', onClick: restartRound },
+            { label: 'New game', primary: true, onClick: openPlayView }
+          ]
+        });
       }, 1200);
     } else {
       // Cancel any pending game-over timer and message timer first.
@@ -1187,17 +1185,105 @@ function applyWordLayout() {
       setState('Round lost.');
       setTips('The beer mug appeared.');
 
-      // Set a 1.2 second delay before showing the game-over dialog
+      // Set a 1.2 second delay before showing the game-over dialog.
+      // The loss modal carries the "Reveal the answer" button inside it;
+      // the answer stays hidden until the player clicks it.
       state.gameOverTimer = window.setTimeout(function () {
-        openMessageDialog('Hangbitch — Game over', [
-          'Five wrong guesses. She got her beer.',
-          'The secret was: ' + round.word
-        ], [
-          { label: 'Restart round', onClick: restartRound },
-          { label: 'New game', primary: true, onClick: openPlayView }
-        ]);
+        openResultDialog(round, {
+          title: 'Hangbitch — Game over',
+          lines: ['Five wrong guesses. She got her beer.'],
+          variant: 'loss',
+          showReveal: true,
+          buttons: [
+            { label: 'Restart round', onClick: restartRound },
+            { label: 'New game', primary: true, onClick: openPlayView }
+          ]
+        });
         state.gameOverTimer = null;
       }, 1200);
+    }
+  }
+
+  /** Build the loss/game-over dialog with an embedded reveal control. */
+  function openLossDialog(round) {
+    openResultDialog(round, {
+      title: 'Hangbitch — Game over',
+      lines: ['Five wrong guesses. She got her beer.'],
+      variant: 'loss',
+      showReveal: true,
+      buttons: [
+        { label: 'Restart round', onClick: restartRound },
+        { label: 'New game', primary: true, onClick: openPlayView }
+      ]
+    });
+  }
+
+  /**
+   * Shared result-dialog builder. Both win and loss use the same answer-box
+   * chrome; the only differences are the title, copy, colour variant, and
+   * whether the answer is shown outright (win) or gated behind a button (loss).
+   *
+   * @param {object} round
+   * @param {object} opts
+   * @param {string} opts.title
+   * @param {string[]} opts.lines        paragraphs above the answer box
+   * @param {string} opts.variant        'win' (green) | 'loss' (amber)
+   * @param {boolean} opts.showReveal    true to add the "Reveal the answer" button
+   * @param {object[]} opts.buttons
+   */
+  function openResultDialog(round, opts) {
+    el['dialog-title'].textContent = opts.title;
+    el['dialog-body'].innerHTML = '';
+
+    (opts.lines || []).forEach(function (line) {
+      var p = document.createElement('p');
+      p.textContent = line;
+      el['dialog-body'].appendChild(p);
+    });
+
+    var answer = L.answer(round);
+
+    if (opts.showReveal) {
+      // Loss: the answer stays hidden until the player clicks the button.
+      var revealWrap = document.createElement('div');
+      revealWrap.className = 'dialog-reveal dialog-reveal--' + opts.variant;
+      revealWrap.innerHTML =
+        '<button type="button" class="btn btn--reveal" id="dialog-reveal-answer" aria-label="Reveal the answer">' +
+        '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">' +
+        '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>' +
+        '<circle cx="12" cy="12" r="3.4" fill="none" stroke="currentColor" stroke-width="2"/></svg>' +
+        '<span>Reveal the answer</span>' +
+        '</button>' +
+        '<div class="dialog-reveal__answer hidden" id="dialog-reveal-answer-box">' +
+        '<span class="label">Answer</span><p id="dialog-reveal-answer-text"></p>' +
+        '</div>';
+      el['dialog-body'].appendChild(revealWrap);
+
+      var revealBtn = revealWrap.querySelector('#dialog-reveal-answer');
+      revealBtn.addEventListener('click', function () {
+        var box = revealWrap.querySelector('#dialog-reveal-answer-box');
+        var text = revealWrap.querySelector('#dialog-reveal-answer-text');
+        if (box.classList.contains('hidden')) {
+          text.textContent = answer;
+          box.classList.remove('hidden');
+          revealBtn.classList.add('is-active');
+        }
+      });
+    } else {
+      // Win: the answer is shown outright in the same box chrome, in green.
+      var box = document.createElement('div');
+      box.className = 'dialog-reveal__answer dialog-reveal__answer--' + opts.variant;
+      box.innerHTML =
+        '<span class="label">Answer</span><p id="dialog-reveal-answer-text"></p>';
+      box.querySelector('#dialog-reveal-answer-text').textContent = answer;
+      el['dialog-body'].appendChild(box);
+    }
+
+    mountDialogButtons(opts.buttons || []);
+    el['dialog-overlay'].classList.remove('hidden');
+    var first = el['dialog-buttons'].querySelector('button');
+    if (first) {
+      first.focus();
     }
   }
 
