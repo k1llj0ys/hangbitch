@@ -590,9 +590,28 @@
       rows.push(row);
     }
 
-    rows.forEach(function (rowItems) {
+    var groupNode = document.createElement('div');
+    groupNode.className = 'word-group';
+
+    rows.forEach(function (rowItems, index) {
       var rowNode = document.createElement('div');
       rowNode.className = 'word-row';
+
+      // // Add word number (1-indexed)
+      // var numSpan = document.createElement('span');
+      // numSpan.className = 'word-num';
+      // numSpan.textContent = (index + 1);
+      // rowNode.appendChild(numSpan);
+
+      // Count letters in this word (guessable letters only)
+      var wordLetterCount = 0;
+      rowItems.forEach(function (item) {
+        if (item.guessable) {
+          wordLetterCount++;
+        }
+      });
+
+      // Add tiles
       rowItems.forEach(function (item) {
         var span = document.createElement('span');
         span.className = 'tile';
@@ -628,8 +647,17 @@
         }
         rowNode.appendChild(span);
       });
-      container.appendChild(rowNode);
+
+      // Add letter count superscript
+      var countSpan = document.createElement('span');
+      countSpan.className = 'word-count';
+      countSpan.textContent = wordLetterCount;
+      rowNode.appendChild(countSpan);
+
+      groupNode.appendChild(rowNode);
     });
+
+    container.appendChild(groupNode);
 
     container.setAttribute(
       'aria-label',
