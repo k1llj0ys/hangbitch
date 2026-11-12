@@ -97,6 +97,12 @@
     winDialogTimer: null      // delayed win message-dialog timer
   };
 
+  // The round whose word DOM currently exists in #word-display. A full rebuild
+  // is required whenever the round changes (e.g. starting a new game with a
+  // different word); only re-renders of the same round (letter guesses) may
+  // update tiles in place.
+  var renderedRound = null;
+
   // View display preferences (persisted in localStorage)
   var viewPrefs = {
     showWordNum: false,   // 'View word num' — unchecked by default
@@ -479,6 +485,7 @@
     }
 
     state.round = null;
+    renderedRound = null;
     renderBoard(null);
     renderLetters(null);
     updateStage(0);
@@ -605,9 +612,11 @@ var container = el['word-display'];
       return;
     }
 
-    // If there is an existing grid, this is an update (letter revealed) —
-    // update tile states in place without rebuilding the DOM.
-    if (existingGrid) {
+    // If there is an existing grid and it belongs to this same round, this is
+    // an update (letter revealed) — update tile states in place without
+    // rebuilding the DOM. A new round always rebuilds from scratch so leftover
+    // tiles/rows from the previous word never persist.
+    if (existingGrid && round === renderedRound) {
       var view = L.renderWord(round);
       var revealedCount = 0;
       var letterCount = 0;
@@ -835,6 +844,8 @@ var container = el['word-display'];
       grid.appendChild(g);
     });
     container.appendChild(grid);
+
+    renderedRound = round;
 
     // Schedule layout recalculation for the new phrase
     scheduleWordLayout();
