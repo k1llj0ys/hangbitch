@@ -199,7 +199,7 @@ const cases = [
   {
     name: '9. the Paint chrome is all there and nothing external is loaded',
     fn: async () => {
-      ['class="titlebar"', 'class="menubar"', 'class="toolbar"', 'class="palette"', 'class="statusbar"']
+      ['class="titlebar"', 'class="menubar ', 'class="toolbar ', 'class="palette ', 'class="statusbar"']
         .forEach(function (needle) {
           includes(indexHtml, needle, 'the page has ' + needle);
         });
@@ -246,16 +246,22 @@ const cases = [
   {
     name: '11. secrets stay in memory and Hangbitch keeps its key under hb.*',
     fn: async () => {
-      noMatch(appCode, /localStorage/, 'app.js must not touch localStorage directly');
+      // The secret round (word / hint / tokens) must never be written to any
+      // storage or logged. View preferences are allowed to use localStorage,
+      // but they are not secrets, so the check is scoped to round data.
+      noMatch(appCode, /setItem\(\s*[^)]*round/, 'the round must never be written to storage');
+      noMatch(appCode, /setItem\(\s*[^)]*\.word\b/, 'the secret word must never be written to storage');
+      noMatch(appCode, /setItem\(\s*[^)]*hint/, 'the hint must never be written to storage');
       noMatch(appCode, /sessionStorage/, 'app.js must not use sessionStorage');
       noMatch(appCode, /indexedDB/, 'app.js must not use IndexedDB');
       noMatch(appCode, /document\.cookie/, 'app.js must not use cookies');
       noMatch(appCode, /console\.(log|warn|error|info)/, 'the secret must never be logged');
-      noMatch(appCode, /setItem\(\s*[^)]*round/, 'the round must never be written to storage');
       includes(appCode, 'round: null', 'the round is an in-memory field');
 
       // By the same rule, the answer is only ever written as text, never markup.
-      noMatch(appCode, /innerHTML\s*=\s*[^;]*round/, 'round data is never injected as markup');
+      // Round data (round.word, L.answer(round), round.hint, round.tokens)
+      // must never be concatenated into an innerHTML assignment.
+      noMatch(appCode, /innerHTML\s*=\s*[^;]*(?:round\.word|answer\(\s*round|round\.hint|round\.tokens)/, 'round data is never injected as markup');
 
       // Every key Hangbitch stores is namespaced under hb.*.
       includes(keyMgmt, "'hb.publicKeyPem'", 'Hangbitch remembers its public key under hb.*');

@@ -331,6 +331,33 @@ textarea[readonly] { background:var(--surface-3); color:#333; }
 .answer-box { background:#f3f8ff; border-color:#cfe0f6; }
 .success { background:#f1faf1; border-color:#c7e6c7; }
 
+/* Reveal-the-answer control embedded inside the result dialogs. */
+.dialog-reveal { margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+.dialog-reveal__answer { padding:10px 12px; background: #edf8ed; border: 1px solid #9fd09f; border-radius: var(--radius); }
+.dialog-reveal__answer .label { display:block; color: #0f6a0f; font-size:11px; font-weight:600; margin-bottom:2px; }
+.dialog-reveal__answer p { margin:0; color:#333; font-weight:600; }
+
+/* Loss variant: amber, answer hidden behind the reveal button. */
+.dialog-reveal--loss { }
+.dialog-reveal--loss .dialog-reveal__answer { background:#fff9e8; border-color:#f0dfaa; }
+.dialog-reveal--loss .dialog-reveal__answer .label { color:#8a5a00; }
+
+/* Win variant: green, answer shown outright. */
+.dialog-reveal--win { }
+.dialog-reveal--win .dialog-reveal__answer { background:#f1faf1; border-color:#c7e6c7; }
+.dialog-reveal--win .dialog-reveal__answer .label { color:#0f6a0f; }
+.dialog-reveal--win .dialog-reveal__answer p { color:#0f6a0f; }
+
+.btn--reveal {
+  align-self:flex-start; display:inline-flex; align-items:center; gap:8px;
+  background:var(--surface-3); color:var(--text);
+  border:1px solid var(--stroke-2); border-radius: var(--radius-sm); cursor:pointer;
+}
+.btn--reveal:hover:not(:disabled) { background:#ededed; border-color:#bdbdbd; }
+.btn--reveal:active:not(:disabled) { background:#e5e5e5; }
+.btn--reveal.is-active { background:var(--accent-subtle); border-color:#b8d6f6; }
+.btn--reveal svg { color:var(--accent-fill); }
+
 .thought-bubble { position:absolute; top:24px; left:36%; max-width:44%; padding:10px 14px; border:1px solid var(--stroke-2); border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,.1); background:#fff; font-weight:600; font-size:14px; text-align:center; opacity:0; transform:scale(.5); pointer-events:none; z-index:12; }
 .thought-bubble:not(.hidden){ animation:hb-bubble-pop .25s ease-out forwards; }
 .thought-bubble--fade-out{ opacity:0; transition:opacity .3s ease; }
