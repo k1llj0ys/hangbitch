@@ -539,7 +539,7 @@
     }
     var body = bubble.querySelector('.thought-bubble__body');
     if (body) {
-      body.textContent = customBody || (kind === 'win' ? 'Nice ka brox!' : kind === 'nice' ? 'Nice!' : 'Mamatay tas imong ka-bugo brox!');
+      body.textContent = customBody || (kind === 'win' ? 'Nice ka brox!' : kind === 'nice' ? 'Nice!' : 'Aray mo, bobo!');
     }
     if (kind === 'loss' && el['thought-bubble-answer']) {
       el['thought-bubble-answer'].textContent = customBody
@@ -1116,7 +1116,7 @@ function applyWordLayout() {
       setMessage('', null);
       showThoughtBubble('nice', null, 'Nice!');
     } else {
-      showThoughtBubble('loss', null, 'BOBO!');
+      showThoughtBubble('loss', null, 'HAHA BOBO!');
       shakeStage();
     }
 
@@ -1192,7 +1192,7 @@ function applyWordLayout() {
       }
 
       setMessage('', null);
-      showThoughtBubble('loss', L.answer(round), 'Mamatay tas imong ka-bugo brox!');
+      showThoughtBubble('loss', L.answer(round), 'Aray mo, bobo!');
       setState('Round lost.');
       setTips('The beer mug appeared.');
 
