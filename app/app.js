@@ -94,7 +94,8 @@
     gameOverTimer: null,    // pending game-over dialog timer
     messageTimer: null,     // pending message fade-out timer
     winTimer: null,           // delayed win bubble timer
-    winDialogTimer: null      // delayed win message-dialog timer
+    winDialogTimer: null,      // delayed win message-dialog timer
+    zoom: 1                   // current zoom level (1 = 100%)
   };
 
   // The round whose word DOM currently exists in #word-display. A full rebuild
@@ -170,6 +171,9 @@
       // view tab checkboxes
       'view-word-num', 'view-word-count',
 
+      // file menu
+      'ribbon-file',
+
       // game
       'view-game', 'hangman-svg', 'stage-caption', 'lives-display', 'lives-icons',
       'lives-text', 'word-display', 'message', 'letter-grid', 'doodles',
@@ -190,7 +194,7 @@
 
       // paint chrome
       'palette', 'color-current',
-      'status-state', 'status-lives', 'status-tips', 'sw-status',
+      'status-state', 'status-lives', 'status-tips', 'sw-status', 'zoom-value',
 
       // dialog
       'dialog-overlay', 'dialog-title', 'dialog-close', 'dialog-body', 'dialog-buttons'
@@ -292,6 +296,28 @@
     var label = state.tool === 'eraser' ? 'Eraser' : 'Pencil';
     var color = state.tool === 'eraser' ? '#ffffff' : state.color;
     setReadout(label + ' · ' + color);
+  }
+
+  function applyZoom() {
+    var win = el['win'];
+    if (!win) {
+      return;
+    }
+    var percent = Math.round(state.zoom * 100);
+    var zoomValue = el['zoom-value'];
+    if (zoomValue) {
+      zoomValue.textContent = percent + '%';
+    }
+    var zoomOut = document.getElementById('zoom-out');
+    var zoomIn = document.getElementById('zoom-in');
+    if (zoomOut) {
+      zoomOut.disabled = state.zoom <= 0.5;
+    }
+    if (zoomIn) {
+      zoomIn.disabled = state.zoom >= 2;
+    }
+    win.style.transformOrigin = 'top left';
+    win.style.transform = 'scale(' + state.zoom + ')';
   }
 
   function describeError(err) {
@@ -1892,6 +1918,10 @@ function applyWordLayout() {
     if (!target.closest('.menu')) {
       closeMenus();
     }
+
+    if (!target.closest('.ribbon__tab--file') && !target.closest('#ribbon-file')) {
+      closeFileMenu();
+    }
   }
 
   /* ------------------------------------------------------------------ *
@@ -2291,6 +2321,7 @@ function applyWordLayout() {
     selectTool('pencil');
     setColor('#000000');
     showView('home');
+    applyZoom();
 
     // Load the built-in (or saved) key so both jobs work with no setup.
     bootKey().then(function () {
@@ -2359,7 +2390,7 @@ function applyWordLayout() {
           t.classList.toggle('is-active', active);
           t.setAttribute('aria-selected', active ? 'true' : 'false');
         });
-        ['file', 'home', 'view'].forEach(function (name) {
+        ['home', 'view'].forEach(function (name) {
           var panel = el['win'].querySelector('#ribbon-' + name);
           if (panel) {
             var on = name === targetTab;
@@ -2367,7 +2398,40 @@ function applyWordLayout() {
             panel.classList.toggle('hidden', !on);
           }
         });
+        closeFileMenu();
         setTips(targetTab.charAt(0).toUpperCase() + targetTab.slice(1) + ' tab.');
+      });
+    });
+
+    // File tab: opens a separate menu outside the ribbon, does not switch ribbon tabs.
+    var fileTab = el['win'].querySelector('.ribbon__tab--file');
+    var fileMenu = el['ribbon-file'];
+    if (fileTab && fileMenu) {
+      fileTab.addEventListener('click', function () {
+        var expanded = fileTab.getAttribute('aria-expanded') === 'true';
+        if (expanded) {
+          closeFileMenu();
+        } else {
+          openFileMenu();
+        }
+      });
+    }
+
+    function openFileMenu() {
+      fileMenu.classList.remove('hidden');
+      fileTab.setAttribute('aria-expanded', 'true');
+      setTips('File menu.');
+    }
+
+    function closeFileMenu() {
+      fileMenu.classList.add('hidden');
+      fileTab.setAttribute('aria-expanded', 'false');
+    }
+
+    // Close the file menu when an action inside it is chosen.
+    Array.prototype.forEach.call(fileMenu.querySelectorAll('[data-action]'), function (item) {
+      item.addEventListener('click', function () {
+        closeFileMenu();
       });
     });
 
@@ -2475,6 +2539,16 @@ function applyWordLayout() {
       viewPrefs.showWordCount = el['view-word-count'].checked;
       saveViewPrefs();
       updateWordDisplayPrefs();
+    });
+
+    // Zoom controls
+    document.getElementById('zoom-out').addEventListener('click', function () {
+      state.zoom = Math.max(0.5, state.zoom - 0.25);
+      applyZoom();
+    });
+    document.getElementById('zoom-in').addEventListener('click', function () {
+      state.zoom = Math.min(2, state.zoom + 0.25);
+      applyZoom();
     });
 
     registerServiceWorker();

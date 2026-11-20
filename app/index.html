@@ -81,7 +81,7 @@
   <!-- ===================== RIBBON ===================== -->
   <div class="ribbon" role="tablist" aria-label="Ribbon tabs">
     <div class="ribbon__tabs">
-      <button type="button" class="ribbon__tab ribbon__tab--file" data-tab="file" role="tab" aria-selected="false">File</button>
+      <button type="button" class="ribbon__tab ribbon__tab--file" data-action="open-file-menu" aria-haspopup="true" aria-expanded="false">File</button>
       <button type="button" class="ribbon__tab is-active" data-tab="home" role="tab" aria-selected="true">Home</button>
       <button type="button" class="ribbon__tab" data-tab="view" role="tab" aria-selected="false">View</button>
       <span class="ribbon__tab-spacer"></span>
@@ -90,7 +90,7 @@
       </button>
     </div>
 
-    <div class="ribbon__panel hidden" id="ribbon-file" role="tabpanel">
+    <div class="ribbon__menu hidden" id="ribbon-file" role="menu" aria-label="File">
       <div class="file-backstage">
         <div class="file-backstage__list">
           <button type="button" class="file-item" data-action="new-game">New</button>
@@ -427,9 +427,9 @@
     <span class="statusbar__cell statusbar__cell--wide" id="status-tips">Pick a job to begin.</span>
     <span class="statusbar__cell" id="sw-status">offline cache not registered</span>
     <span class="statusbar__zoom" aria-label="Zoom controls">
-      <button type="button" class="zoom-btn" aria-label="Zoom out" disabled>&minus;</button>
+      <button type="button" class="zoom-btn" id="zoom-out" aria-label="Zoom out">&minus;</button>
       <span class="zoom-value">100%</span>
-      <button type="button" class="zoom-btn" aria-label="Zoom in" disabled>+</button>
+      <button type="button" class="zoom-btn" id="zoom-in" aria-label="Zoom in">+</button>
     </span>
   </div>
 
