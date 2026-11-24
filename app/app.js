@@ -165,6 +165,7 @@
 
       // play
       'view-play', 'manual-word', 'manual-hint', 'btn-manual-start', 'manual-status',
+      'btn-toggle-manual-word',
       'payload-input', 'btn-paste-start', 'btn-clear-payload', 'decrypt-key-note',
       'payload-meta', 'import-status', 'btn-home-from-play',
 
@@ -2356,6 +2357,18 @@ function applyWordLayout() {
         }
       });
     });
+
+    // Toggle visibility for manual word input
+    if (el['btn-toggle-manual-word']) {
+      el['btn-toggle-manual-word'].addEventListener('click', function () {
+        var input = el['manual-word'];
+        var btn = el['btn-toggle-manual-word'];
+        var isVisible = input.type === 'text';
+        input.type = isVisible ? 'password' : 'text';
+        btn.setAttribute('aria-pressed', String(!isVisible));
+        btn.setAttribute('aria-label', isVisible ? 'Show secret word' : 'Hide secret word');
+      });
+    }
 
     el['btn-paste-start'].addEventListener('click', handlePasteStart);
     el['btn-clear-payload'].addEventListener('click', clearPayloadBox);
